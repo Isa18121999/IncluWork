@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
 
+const calculateMatch = require("../services/matchingService");
+
 const jobs = [];
 
 const candidates = [
   {
     name: "Candidato recomendado",
     skills: ["React", "JavaScript", "Accesibilidad"],
-    match: 94,
     status: "Postulado"
   },
   {
     name: "Perfil compatible",
     skills: ["Node.js", "MongoDB"],
-    match: 87,
     status: "CV visto"
   }
 ];
@@ -34,9 +34,18 @@ router.post("/jobs", (req, res) => {
 });
 
 router.get("/candidates/:jobId", (req, res) => {
+  const job = jobs.find(item => item.id === req.params.jobId) || {
+    requirements: ["React", "JavaScript"]
+  };
+
+  const recommended = candidates.map(candidate => ({
+    ...candidate,
+    ...calculateMatch(candidate, job)
+  }));
+
   res.json({
     jobId: req.params.jobId,
-    candidates,
+    candidates: recommended,
     message: "Candidatos recomendados por Match IA"
   });
 });
