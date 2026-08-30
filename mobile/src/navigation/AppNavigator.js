@@ -8,6 +8,7 @@ import CandidateDashboard from "../screens/CandidateDashboard";
 import CandidateProfileScreen from "../screens/CandidateProfileScreen";
 import CVUpload from "../screens/CVUpload";
 import JobsScreen from "../screens/JobsScreen";
+import JobDetailScreen from "../screens/JobDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ export default function AppNavigator() {
         <Stack.Screen name="CandidateProfile" component={CandidateProfileScreen} />
         <Stack.Screen name="CV" component={CVUpload} />
         <Stack.Screen name="Jobs" component={JobsScreen} />
+        <Stack.Screen name="JobDetail" component={JobDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
