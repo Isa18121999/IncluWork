@@ -14,16 +14,16 @@ export default function CompanyDashboardScreen({ navigation }) {
       <Text style={styles.title}>🏢 Panel Empresa</Text>
       <Text style={styles.subtitle}>Gestiona ofertas y encuentra talento inclusivo.</Text>
 
-      <AccessibleButton title="📌 Publicar oferta" onPress={() => {}} />
+      <AccessibleButton title="📌 Publicar oferta" onPress={() => navigation.navigate("CreateJob")} />
 
       <Text style={styles.section}>🤖 Candidatos recomendados por IA</Text>
 
       {candidates.map((candidate, index) => (
-        <View key={index} style={styles.card} accessible>
+        <View key={index} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.match}% Match IA`}>
           <Text style={styles.name}>{candidate.name}</Text>
           <Text style={styles.match}>🤖 {candidate.match}% Match IA</Text>
           <Text>{candidate.status}</Text>
-          <AccessibleButton title="Ver CV" onPress={() => {}} />
+          <AccessibleButton title="Ver CV" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
         </View>
       ))}
     </ScrollView>
