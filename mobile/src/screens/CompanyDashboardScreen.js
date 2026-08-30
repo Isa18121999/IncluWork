@@ -16,12 +16,9 @@ export default function CompanyDashboardScreen({ navigation }) {
     try {
       const response = await fetch(API_URL);
       const data = await response.json();
-      setCandidates(data);
+      setCandidates(data.candidates || []);
     } catch (error) {
-      setCandidates([
-        { name: "Candidato recomendado", match: 94, status: "Postulado" },
-        { name: "Perfil compatible", match: 87, status: "CV visto" },
-      ]);
+      setCandidates([]);
     }
   };
 
@@ -38,6 +35,7 @@ export default function CompanyDashboardScreen({ navigation }) {
         <View key={index} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.match}% Match IA`}>
           <Text style={styles.name}>{candidate.name}</Text>
           <Text style={styles.match}>🤖 {candidate.match}% Match IA</Text>
+          <Text>🧠 {candidate.skills?.join(" · ")}</Text>
           <Text>{candidate.status}</Text>
           <AccessibleButton title="Ver CV" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
         </View>
