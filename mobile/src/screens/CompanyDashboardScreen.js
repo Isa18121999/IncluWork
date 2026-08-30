@@ -1,13 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
 
+const API_URL = "http://localhost:3000/api/company/candidates/demo";
+
 export default function CompanyDashboardScreen({ navigation }) {
-  const candidates = [
-    { name: "Candidato recomendado", match: 94, status: "Postulado" },
-    { name: "Perfil compatible", match: 87, status: "CV visto" },
-  ];
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    loadCandidates();
+  }, []);
+
+  const loadCandidates = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setCandidates(data);
+    } catch (error) {
+      setCandidates([
+        { name: "Candidato recomendado", match: 94, status: "Postulado" },
+        { name: "Perfil compatible", match: 87, status: "CV visto" },
+      ]);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
