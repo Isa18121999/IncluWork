@@ -10,19 +10,27 @@ export default function CandidateCVScreen({ route, navigation }) {
   const [status, setStatus] = useState(candidate?.status || "Postulado");
 
   const updateStatus = async (newStatus) => {
-    setStatus(newStatus);
+    if (!candidate?.applicationId) {
+      Alert.alert("Error", "No se encontró la postulación.");
+      return;
+    }
+
     try {
-      await fetch(API_URL, {
-        method: "POST",
+      const response = await fetch(`${API_URL}/${candidate.applicationId}/status`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          candidateId: candidate?.id,
-          status: newStatus
-        })
+        body: JSON.stringify({ status: newStatus })
       });
-      Alert.alert("Actualizado", `Estado: ${newStatus}`);
+
+      if (!response.ok) {
+        throw new Error("No se pudo actualizar la postulación");
+      }
+
+      const updatedApplication = await response.json();
+      setStatus(updatedApplication.status);
+      Alert.alert("Actualizado", `Estado: ${updatedApplication.status}`);
     } catch (error) {
-      Alert.alert("Error", "No se pudo actualizar el estado.");
+      Alert.alert("Error", error.message || "No se pudo actualizar el estado.");
     }
   };
 
