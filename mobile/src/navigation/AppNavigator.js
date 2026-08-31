@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import CandidateRegister from "../screens/CandidateRegister";
+import CompanyRegister from "../screens/CompanyRegister";
 import CandidateDashboard from "../screens/CandidateDashboard";
 import CandidateProfileScreen from "../screens/CandidateProfileScreen";
 import CVUpload from "../screens/CVUpload";
@@ -23,6 +24,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="CandidateRegister" component={CandidateRegister} />
+        <Stack.Screen name="CompanyRegister" component={CompanyRegister} />
         <Stack.Screen name="CandidateDashboard" component={CandidateDashboard} />
         <Stack.Screen name="CandidateProfile" component={CandidateProfileScreen} />
         <Stack.Screen name="CV" component={CVUpload} />
