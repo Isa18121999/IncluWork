@@ -2,23 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const companyController = require("../controllers/companyController");
+const jobController = require("../controllers/jobController");
 
-const jobs = [];
+router.get("/jobs", jobController.getJobs);
 
-router.get("/jobs", (req, res) => {
-  res.json(jobs);
-});
-
-router.post("/jobs", (req, res) => {
-  const job = {
-    id: Date.now().toString(),
-    ...req.body,
-    createdAt: new Date()
-  };
-
-  jobs.push(job);
-  res.status(201).json(job);
-});
+router.post("/jobs", jobController.createJob);
 
 router.get("/candidates/:jobId", companyController.getRecommendedCandidates);
 
