@@ -7,14 +7,23 @@ const API_URL = "http://localhost:3000/api/company/jobs";
 
 export default function CreateJobScreen({ navigation }) {
   const [title, setTitle] = useState("");
+  const [area, setArea] = useState("");
+  const [modality, setModality] = useState("");
   const [requirements, setRequirements] = useState("");
 
   const publishJob = async () => {
     await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, requirements, accessibility: "Ajustes inclusivos" })
+      body: JSON.stringify({
+        title,
+        area,
+        modality,
+        requirements: requirements.split(",").map(item => item.trim()),
+        accessibility: ["Ajustes inclusivos"]
+      })
     });
+
     navigation.goBack();
   };
 
@@ -22,7 +31,9 @@ export default function CreateJobScreen({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>📌 Publicar oferta laboral</Text>
       <TextInput style={styles.input} placeholder="Cargo" value={title} onChangeText={setTitle} />
-      <TextInput style={styles.input} placeholder="Requisitos y habilidades" value={requirements} onChangeText={setRequirements} />
+      <TextInput style={styles.input} placeholder="Área profesional" value={area} onChangeText={setArea} />
+      <TextInput style={styles.input} placeholder="Modalidad" value={modality} onChangeText={setModality} />
+      <TextInput style={styles.input} placeholder="Requisitos separados por coma" value={requirements} onChangeText={setRequirements} />
       <AccessibleButton title="Publicar oferta" onPress={publishJob} />
     </ScrollView>
   );
