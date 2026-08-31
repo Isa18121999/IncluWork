@@ -5,7 +5,6 @@ import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
 
 const API_URL = "http://localhost:3000/api/auth";
-
 const COUNTRIES = [
   { label: "🇵🇪 Perú", value: "PE", document: "Carnet/Certificado CONADIS" },
   { label: "🇨🇴 Colombia", value: "CO", document: "Certificado de discapacidad" },
@@ -14,7 +13,7 @@ const COUNTRIES = [
   { label: "🇦🇷 Argentina", value: "AR", document: "Certificado Único de Discapacidad (CUD)" },
   { label: "🇪🇸 España", value: "ES", document: "Certificado de grado de discapacidad" },
   { label: "🇺🇸 Estados Unidos", value: "US", document: "Acreditación oficial aplicable" },
-  { label: "🌎 Otro país", value: "OTHER", document: "Certificación oficial equivalente" },
+  { label: "🌎 Otro país", value: "OTHER", document: "Certificación oficial equivalente" }
 ];
 
 export default function CandidateRegister({ navigation }) {
@@ -24,18 +23,13 @@ export default function CandidateRegister({ navigation }) {
   const [country, setCountry] = useState("PE");
   const [documentNumber, setDocumentNumber] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const countryData = useMemo(
-    () => COUNTRIES.find((item) => item.value === country) || COUNTRIES[0],
-    [country]
-  );
+  const countryData = useMemo(() => COUNTRIES.find((item) => item.value === country) || COUNTRIES[0], [country]);
 
   const submitRegistration = async () => {
     if (!name.trim() || !email.trim() || !password || !documentNumber.trim()) {
       Alert.alert("Datos incompletos", "Completa nombre, correo, contraseña y número de acreditación.");
       return;
     }
-
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/register`, {
@@ -45,20 +39,17 @@ export default function CandidateRegister({ navigation }) {
           name: name.trim(),
           email: email.trim(),
           password,
-          role: "candidate"
+          role: "candidate",
+          country,
+          accreditationType: countryData.document,
+          accreditationNumber: documentNumber.trim()
         })
       });
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "No se pudo completar el registro");
-      }
-
-      Alert.alert(
-        "Registro correcto",
-        "Tu cuenta fue creada. La acreditación quedará pendiente de verificación.",
-        [{ text: "Continuar", onPress: () => navigation.replace("CandidateDashboard") }]
-      );
+      if (!response.ok) throw new Error(data.message || "No se pudo completar el registro");
+      Alert.alert("Registro correcto", "Tu cuenta y perfil de candidato fueron creados.", [
+        { text: "Continuar", onPress: () => navigation.replace("CandidateDashboard") }
+      ]);
     } catch (error) {
       Alert.alert("Error de registro", error.message || "No se pudo conectar con el servidor.");
     } finally {
@@ -69,24 +60,15 @@ export default function CandidateRegister({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Registro de candidato</Text>
-      <Text style={styles.subtitle}>
-        Crea tu cuenta y completa los datos de acreditación para utilizar IncluWork.
-      </Text>
-
+      <Text style={styles.subtitle}>Crea tu cuenta y completa los datos de acreditación para utilizar IncluWork.</Text>
       <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Correo electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Correo electrónico" />
       <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
-
       <Text style={styles.label}>País de registro</Text>
-      <Picker selectedValue={country} onValueChange={setCountry}>
-        {COUNTRIES.map((item) => <Picker.Item key={item.value} label={item.label} value={item.value} />)}
-      </Picker>
-
+      <Picker selectedValue={country} onValueChange={setCountry}>{COUNTRIES.map((item) => <Picker.Item key={item.value} label={item.label} value={item.value} />)}</Picker>
       <Text style={styles.label}>Tipo de acreditación</Text>
       <View style={styles.readonlyBox}><Text style={styles.readonlyText}>{countryData.document}</Text></View>
-
       <TextInput style={styles.input} placeholder="Número de carnet o certificado" value={documentNumber} onChangeText={setDocumentNumber} accessibilityLabel="Número de carnet o certificado" />
-
       <AccessibleButton title={loading ? "Registrando..." : "Crear cuenta"} onPress={submitRegistration} disabled={loading} />
       <AccessibleButton title="Ya tengo una cuenta" type="secondary" onPress={() => navigation.navigate("Login")} disabled={loading} />
     </ScrollView>
