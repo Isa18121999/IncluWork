@@ -1,9 +1,11 @@
-const calculateMatch = (candidate, job) => {
-  const candidateSkills = candidate.skills || [];
-  const requirements = job.requirements || [];
+const normalize = value => String(value || "").trim().toLowerCase();
 
-  const matches = candidateSkills.filter(skill =>
-    requirements.includes(skill)
+const calculateMatch = (candidate, job) => {
+  const candidateSkills = (candidate.skills || []).map(normalize).filter(Boolean);
+  const requirements = (job.requirements || []).map(normalize).filter(Boolean);
+
+  const matches = requirements.filter(requirement =>
+    candidateSkills.includes(requirement)
   );
 
   const score = requirements.length
