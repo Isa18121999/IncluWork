@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "IncluWork",
+    "slug": "incluwork",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["android", "ios", "web"],
+    "plugins": [
+      "expo-document-picker"
+    ]
+  }
+}
