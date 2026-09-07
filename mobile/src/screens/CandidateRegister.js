@@ -2,9 +2,10 @@ import React, { useMemo, useState } from "react";
 import { Alert, View, Text, TextInput, StyleSheet, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/auth";
+const AUTH_URL = `${API_URL}/auth`;
 const COUNTRIES = [
   { label: "🇵🇪 Perú", value: "PE", document: "Carnet/Certificado CONADIS" },
   { label: "🇨🇴 Colombia", value: "CO", document: "Certificado de discapacidad" },
@@ -32,7 +33,7 @@ export default function CandidateRegister({ navigation }) {
     }
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/register`, {
+      const response = await fetch(`${AUTH_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

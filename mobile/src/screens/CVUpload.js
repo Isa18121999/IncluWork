@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Alert, View, Text, StyleSheet } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/cv";
+const CV_URL = `${API_URL}/cv`;
 
 export default function CVUpload({ navigation, route }) {
   const [cvName, setCvName] = useState("");
@@ -42,7 +43,7 @@ export default function CVUpload({ navigation, route }) {
         type: file.mimeType || "application/pdf"
       });
 
-      const response = await fetch(`${API_URL}/${candidateId}`, {
+      const response = await fetch(`${CV_URL}/${candidateId}`, {
         method: "POST",
         body: formData
       });

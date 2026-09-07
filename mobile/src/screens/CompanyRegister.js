@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/auth";
+const AUTH_URL = `${API_URL}/auth`;
 
 export default function CompanyRegister({ navigation }) {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export default function CompanyRegister({ navigation }) {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/register`, {
+      const response = await fetch(`${AUTH_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

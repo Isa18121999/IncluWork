@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment configuration
+.env
+.env.*
+!.env.example
+
+# Runtime uploads
+backend/uploads/
+
+# Expo
+mobile/.expo/
+mobile/web-build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build output
+mobile/dist/
