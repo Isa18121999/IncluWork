@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { ScrollView, Text, TextInput, StyleSheet } from "react-native";
+import { Alert, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/company/jobs";
+const JOBS_URL = `${API_URL}/company/jobs`;
 
 export default function CreateJobScreen({ navigation }) {
   const [title, setTitle] = useState("");
@@ -12,19 +13,27 @@ export default function CreateJobScreen({ navigation }) {
   const [requirements, setRequirements] = useState("");
 
   const publishJob = async () => {
-    await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        area,
-        modality,
-        requirements: requirements.split(",").map(item => item.trim()),
-        accessibility: ["Ajustes inclusivos"]
-      })
-    });
+    if (!title.trim()) {
+      Alert.alert("Datos incompletos", "Ingresa el cargo de la oferta.");
+      return;
+    }
 
-    navigation.goBack();
+    try {
+      const response = await fetch(JOBS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(), area: area.trim(), modality: modality.trim(),
+          requirements: requirements.split(",").map((item) => item.trim()).filter(Boolean),
+          accessibility: ["Ajustes inclusivos"]
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "No se pudo publicar la oferta");
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Error", error.message || "No se pudo conectar con el servidor.");
+    }
   };
 
   return (

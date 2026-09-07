@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/company/candidates/demo";
+const JOBS_URL = `${API_URL}/company/jobs`;
 
 export default function CompanyDashboardScreen({ navigation }) {
   const [candidates, setCandidates] = useState([]);
@@ -14,9 +15,13 @@ export default function CompanyDashboardScreen({ navigation }) {
 
   const loadCandidates = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(JOBS_URL);
       const data = await response.json();
-      setCandidates(data.candidates || []);
+      const firstJob = data[0];
+      if (!firstJob?._id) return setCandidates([]);
+      const candidatesResponse = await fetch(`${API_URL}/company/candidates/${firstJob._id}`);
+      const candidatesData = await candidatesResponse.json();
+      setCandidates(candidatesResponse.ok ? candidatesData.candidates || [] : []);
     } catch (error) {
       setCandidates([]);
     }
@@ -34,7 +39,7 @@ export default function CompanyDashboardScreen({ navigation }) {
       {candidates.map((candidate, index) => (
         <View key={index} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.match}% Match IA`}>
           <Text style={styles.name}>{candidate.name}</Text>
-          <Text style={styles.match}>🤖 {candidate.match}% Match IA</Text>
+          <Text style={styles.match}>🤖 {candidate.score}% Match IA</Text>
           <Text>🧠 {candidate.skills?.join(" · ")}</Text>
           <Text>{candidate.status}</Text>
           <AccessibleButton title="Ver CV" onPress={() => navigation.navigate("CandidateCV", { candidate })} />

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Alert, ScrollView, Text, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 
-const API_URL = "http://localhost:3000/api/applications";
+const APPLICATIONS_URL = `${API_URL}/applications`;
 
 export default function CandidateCVScreen({ route, navigation }) {
   const { candidate } = route.params || {};
@@ -16,7 +17,7 @@ export default function CandidateCVScreen({ route, navigation }) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/${candidate.applicationId}/status`, {
+      const response = await fetch(`${APPLICATIONS_URL}/${candidate.applicationId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
