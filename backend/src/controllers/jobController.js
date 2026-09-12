@@ -5,10 +5,14 @@ const createJob = async (req, res) => {
   try {
     const company = await Company.findOne({ userId: req.user.id });
     if (!company) return res.status(404).json({ message: "Perfil de empresa no encontrado" });
+
+    const experienceRequired = Number(req.body.experienceRequired);
     const job = await Job.create({
       title: req.body.title,
       area: req.body.area || "",
       modality: req.body.modality || "",
+      experienceRequired: Number.isFinite(experienceRequired) && experienceRequired >= 0 ? experienceRequired : 0,
+      educationRequired: req.body.educationRequired || "",
       requirements: Array.isArray(req.body.requirements) ? req.body.requirements : [],
       accessibility: Array.isArray(req.body.accessibility) ? req.body.accessibility : [],
       companyId: company._id
