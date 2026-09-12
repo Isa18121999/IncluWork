@@ -3,6 +3,7 @@ import { Alert, ScrollView, Text, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { authHeaders } from "../config/session";
 
 const APPLICATIONS_URL = `${API_URL}/applications`;
 
@@ -19,7 +20,7 @@ export default function CandidateCVScreen({ route, navigation }) {
     try {
       const response = await fetch(`${APPLICATIONS_URL}/${candidate.applicationId}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ status: newStatus })
       });
 

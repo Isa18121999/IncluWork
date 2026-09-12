@@ -3,6 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, Vie
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { setSessionToken } from "../config/session";
 
 const AUTH_URL = `${API_URL}/auth`;
 
@@ -26,7 +27,8 @@ export default function LoginScreen({ navigation }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo iniciar sesión");
 
-      const params = { userId: data.user.id };
+      setSessionToken(data.token);
+      const params = { userId: data.user.id, token: data.token };
       if (data.user.role === "company") {
         navigation.replace("CompanyDashboard", params);
       } else if (data.user.role === "candidate") {

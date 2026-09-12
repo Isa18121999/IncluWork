@@ -1,6 +1,7 @@
 const Candidate = require("../models/Candidate");
 const Job = require("../models/Job");
 const Application = require("../models/Application");
+const Company = require("../models/Company");
 const calculateMatch = require("../services/matchingService");
 
 const getRecommendedCandidates = async (req, res) => {
@@ -10,6 +11,8 @@ const getRecommendedCandidates = async (req, res) => {
     if (!job) {
       return res.status(404).json({ message: "Oferta no encontrada" });
     }
+    const company = await Company.findOne({ userId: req.user.id });
+    if (!company || job.companyId.toString() !== company._id.toString()) return res.status(403).json({ message: "No puedes ver candidatos de esta oferta" });
 
     const candidates = await Candidate.find();
     const applications = await Application.find({ jobId: job._id });

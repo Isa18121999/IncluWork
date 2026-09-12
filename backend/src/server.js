@@ -9,6 +9,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const cvRoutes = require("./routes/cvRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 const app = express();
 const uploadsDirectory = path.join(__dirname, "..", "uploads");
@@ -23,6 +24,7 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/cv", cvRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -47,6 +49,7 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
+    if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is required");
     await connectDatabase();
     app.listen(PORT, () => console.log(`IncluWork API running on ${PORT}`));
   } catch (error) {

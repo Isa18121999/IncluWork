@@ -14,6 +14,7 @@ import JobDetailScreen from "../screens/JobDetailScreen";
 import CompanyDashboardScreen from "../screens/CompanyDashboardScreen";
 import CreateJobScreen from "../screens/CreateJobScreen";
 import CandidateCVScreen from "../screens/CandidateCVScreen";
+import ApplicationsScreen from "../screens/ApplicationsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,7 @@ export default function AppNavigator() {
         <Stack.Screen name="CompanyDashboard" component={CompanyDashboardScreen} />
         <Stack.Screen name="CreateJob" component={CreateJobScreen} />
         <Stack.Screen name="CandidateCV" component={CandidateCVScreen} />
+        <Stack.Screen name="Applications" component={ApplicationsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

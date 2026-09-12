@@ -3,6 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, Vie
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { setSessionToken } from "../config/session";
 
 const AUTH_URL = `${API_URL}/auth`;
 
@@ -36,8 +37,9 @@ export default function CompanyRegister({ navigation }) {
         throw new Error(data.message || "No se pudo completar el registro");
       }
 
+      setSessionToken(data.token);
       Alert.alert("Registro exitoso", "Tu empresa fue registrada correctamente.", [
-        { text: "Continuar", onPress: () => navigation.replace("CompanyDashboard") }
+        { text: "Continuar", onPress: () => navigation.replace("CompanyDashboard", { userId: data.user.id, token: data.token }) }
       ]);
     } catch (error) {
       Alert.alert("Error de registro", error.message || "No se pudo conectar con el servidor.");

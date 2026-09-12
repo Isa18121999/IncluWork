@@ -3,6 +3,7 @@ import { ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { authHeaders } from "../config/session";
 
 const JOBS_URL = `${API_URL}/company/jobs`;
 
@@ -15,11 +16,11 @@ export default function CompanyDashboardScreen({ navigation }) {
 
   const loadCandidates = async () => {
     try {
-      const response = await fetch(JOBS_URL);
+      const response = await fetch(`${API_URL}/company/my-jobs`, { headers: authHeaders() });
       const data = await response.json();
       const firstJob = data[0];
       if (!firstJob?._id) return setCandidates([]);
-      const candidatesResponse = await fetch(`${API_URL}/company/candidates/${firstJob._id}`);
+      const candidatesResponse = await fetch(`${API_URL}/company/candidates/${firstJob._id}`, { headers: authHeaders() });
       const candidatesData = await candidatesResponse.json();
       setCandidates(candidatesResponse.ok ? candidatesData.candidates || [] : []);
     } catch (error) {

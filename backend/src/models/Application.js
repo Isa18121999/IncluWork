@@ -18,4 +18,6 @@ ApplicationSchema.pre("save", function(next) {
   next();
 });
 
+ApplicationSchema.index({ candidateId: 1, jobId: 1 }, { unique: true });
+
 module.exports = mongoose.model("Application", ApplicationSchema);

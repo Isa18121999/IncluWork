@@ -1,0 +1,22 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: incluwork
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build: ./backend
+    depends_on:
+      - mongodb
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/incluwork
+      JWT_SECRET: change-this-in-production
+      CORS_ORIGIN: http://localhost:8081
+volumes:
+  mongo_data:
