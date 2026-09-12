@@ -27,7 +27,16 @@ router.get("/matches", requireAuth, async (req, res) => {
     const jobs = await Job.find().populate("companyId", "name").sort({ createdAt: -1 });
     const matches = jobs.map((job) => {
       const match = calculateMatch(candidate, job);
-      return { ...job.toObject(), score: match.score, matchedSkills: match.matchedSkills, missingSkills: match.missingSkills, reasons: match.reasons };
+      return {
+        ...job.toObject(),
+        score: match.score,
+        breakdown: match.breakdown,
+        matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills,
+        matchedAccessibility: match.matchedAccessibility,
+        missingAccessibility: match.missingAccessibility,
+        reasons: match.reasons
+      };
     }).sort((a, b) => b.score - a.score);
     return res.json({ candidateId: candidate._id, matches });
   } catch (error) { return res.status(500).json({ message: "Error obteniendo matches", error: error.message }); }
