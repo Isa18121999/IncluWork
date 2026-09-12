@@ -11,7 +11,10 @@ export default function CreateJobScreen({ navigation }) {
   const [title, setTitle] = useState("");
   const [area, setArea] = useState("");
   const [modality, setModality] = useState("");
+  const [experienceRequired, setExperienceRequired] = useState("");
+  const [educationRequired, setEducationRequired] = useState("");
   const [requirements, setRequirements] = useState("");
+  const [accessibility, setAccessibility] = useState("");
 
   const publishJob = async () => {
     if (!title.trim()) {
@@ -24,9 +27,13 @@ export default function CreateJobScreen({ navigation }) {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
-          title: title.trim(), area: area.trim(), modality: modality.trim(),
-          requirements: requirements.split(",").map((item) => item.trim()).filter(Boolean),
-          accessibility: ["Ajustes inclusivos"]
+          title: title.trim(),
+          area: area.trim(),
+          modality: modality.trim(),
+          experienceRequired: Number(experienceRequired) || 0,
+          educationRequired: educationRequired.trim(),
+          requirements: requirements.split(",").map(item => item.trim()).filter(Boolean),
+          accessibility: accessibility.split(",").map(item => item.trim()).filter(Boolean)
         })
       });
       const data = await response.json();
@@ -42,8 +49,11 @@ export default function CreateJobScreen({ navigation }) {
       <Text style={styles.title}>📌 Publicar oferta laboral</Text>
       <TextInput style={styles.input} placeholder="Cargo" value={title} onChangeText={setTitle} />
       <TextInput style={styles.input} placeholder="Área profesional" value={area} onChangeText={setArea} />
-      <TextInput style={styles.input} placeholder="Modalidad" value={modality} onChangeText={setModality} />
-      <TextInput style={styles.input} placeholder="Requisitos separados por coma" value={requirements} onChangeText={setRequirements} />
+      <TextInput style={styles.input} placeholder="Modalidad: remoto, híbrido o presencial" value={modality} onChangeText={setModality} />
+      <TextInput style={styles.input} placeholder="Experiencia mínima en años" value={experienceRequired} onChangeText={setExperienceRequired} keyboardType="numeric" />
+      <TextInput style={styles.input} placeholder="Formación académica requerida" value={educationRequired} onChangeText={setEducationRequired} />
+      <TextInput style={styles.input} placeholder="Requisitos / habilidades separados por coma" value={requirements} onChangeText={setRequirements} />
+      <TextInput style={styles.input} placeholder="Accesibilidad requerida, separada por coma" value={accessibility} onChangeText={setAccessibility} />
       <AccessibleButton title="Publicar oferta" onPress={publishJob} />
     </ScrollView>
   );

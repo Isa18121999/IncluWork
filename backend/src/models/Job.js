@@ -5,6 +5,8 @@ const JobSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
   area: { type: String, default: "" },
   modality: { type: String, default: "" },
+  experienceRequired: { type: Number, min: 0, default: 0 },
+  educationRequired: { type: String, default: "" },
   requirements: { type: [String], default: [] },
   accessibility: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now }
