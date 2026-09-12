@@ -1,8 +1,13 @@
 const express = require("express");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/User");
 const Candidate = require("../models/Candidate");
+const Company = require("../models/Company");
+
+const publicUser = (user) => ({ id: user._id, name: user.name, email: user.email, role: user.role, active: user.active });
+const issueToken = (user) => jwt.sign({ id: user._id.toString(), role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
 
 const hashPassword = (password, salt = crypto.randomBytes(16).toString("hex")) => {
   const hash = crypto.scryptSync(password, salt, 64).toString("hex");
@@ -21,8 +26,8 @@ const verifyPassword = (password, storedPassword) => {
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role, country, accreditationType, accreditationNumber } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "Nombre, email y contraseña son obligatorios" });
+    if (!name || !email || !password || String(password).length < 8) {
+      return res.status(400).json({ message: "Nombre, email y una contraseña de al menos 8 caracteres son obligatorios" });
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
@@ -39,8 +44,9 @@ router.post("/register", async (req, res) => {
       active: true
     });
 
+    let profile;
     if (normalizedRole === "candidate") {
-      await Candidate.create({
+      profile = await Candidate.create({
         userId: user._id,
         name: user.name,
         email: user.email,
@@ -48,11 +54,13 @@ router.post("/register", async (req, res) => {
         accreditationType: accreditationType || "",
         accreditationNumber: accreditationNumber || ""
       });
+    } else {
+      profile = await Company.create({ userId: user._id, name: user.name, email: user.email });
     }
 
     res.status(201).json({
       message: "Registro correcto",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, active: user.active }
+      user: publicUser(user), token: issueToken(user), profileId: profile._id
     });
   } catch (error) {
     res.status(500).json({ message: "Error registrando usuario", error: error.message });
@@ -70,7 +78,7 @@ router.post("/login", async (req, res) => {
 
     res.json({
       message: "Login correcto",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, active: user.active }
+      user: publicUser(user), token: issueToken(user)
     });
   } catch (error) {
     res.status(500).json({ message: "Error iniciando sesión", error: error.message });

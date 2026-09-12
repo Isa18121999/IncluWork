@@ -4,6 +4,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Candidate = require("../models/Candidate");
+const { requireAuth, requireRole } = require("../middleware/auth");
+const { removeLocalCv } = require("../storage/cvStorage");
 
 const uploadDirectory = path.join(__dirname, "..", "..", "uploads", "cv");
 fs.mkdirSync(uploadDirectory, { recursive: true });
@@ -26,20 +28,20 @@ const upload = multer({
   }
 });
 
-router.post("/:candidateId", upload.single("cv"), async (req, res) => {
+router.post("/me", requireAuth, requireRole("candidate"), upload.single("cv"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "CV requerido" });
 
-    const candidate = await Candidate.findByIdAndUpdate(
-      req.params.candidateId,
-      { cvUrl: `/uploads/cv/${req.file.filename}` },
-      { new: true }
-    );
+    const candidate = await Candidate.findOne({ userId: req.user.id });
 
     if (!candidate) {
       fs.unlink(req.file.path, () => {});
       return res.status(404).json({ message: "Candidato no encontrado" });
     }
+
+    removeLocalCv(candidate.cvUrl);
+    candidate.cvUrl = `/uploads/cv/${req.file.filename}`;
+    await candidate.save();
 
     res.json({ message: "CV actualizado", candidate });
   } catch (error) {

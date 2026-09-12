@@ -1,0 +1,8 @@
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, Text, View, StyleSheet } from "react-native";
+import AccessibleButton from "../components/AccessibleButton";
+import { API_URL } from "../config/api";
+import { authHeaders } from "../config/session";
+import { colors } from "../theme/colors";
+export default function ApplicationsScreen({ navigation }) { const [applications, setApplications] = useState([]); const [loading, setLoading] = useState(true); useEffect(() => { fetch(`${API_URL}/applications`, { headers: authHeaders() }).then(async (res) => res.ok ? res.json() : []).then(setApplications).catch(() => setApplications([])).finally(() => setLoading(false)); }, []); return <ScrollView contentContainerStyle={styles.container}><Text style={styles.title}>Mis postulaciones</Text>{loading && <ActivityIndicator color={colors.primary} />}{applications.map((application) => <View key={application._id} style={styles.card}><Text style={styles.job}>{application.jobId?.title || "Oferta"}</Text><Text>{application.jobId?.companyId?.name || "Empresa"}</Text><Text style={styles.status}>{application.status}</Text></View>)}{!loading && !applications.length && <Text>Aún no tienes postulaciones.</Text>}<AccessibleButton title="Buscar empleos" onPress={() => navigation.navigate("Jobs")} /></ScrollView>; }
+const styles = StyleSheet.create({ container: { flexGrow: 1, padding: 24, backgroundColor: colors.white }, title: { fontSize: 28, fontWeight: "800", color: colors.primary, marginBottom: 20 }, card: { padding: 16, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, marginBottom: 12 }, job: { fontWeight: "800", fontSize: 18 }, status: { color: colors.secondary, marginTop: 8, fontWeight: "700" } });

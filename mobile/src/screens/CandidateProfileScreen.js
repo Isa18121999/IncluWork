@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { ScrollView, Text, TextInput, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
+import { API_URL } from "../config/api";
+import { authHeaders } from "../config/session";
 
 export default function CandidateProfileScreen({ navigation }) {
   const [name, setName] = useState("");
@@ -10,6 +12,28 @@ export default function CandidateProfileScreen({ navigation }) {
   const [skills, setSkills] = useState("");
   const [education, setEducation] = useState("");
   const [modality, setModality] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { loadProfile(); }, []);
+  const loadProfile = async () => {
+    try {
+      const response = await fetch(`${API_URL}/profile/me`, { headers: authHeaders() });
+      const profile = await response.json();
+      if (!response.ok) return;
+      setName(profile.name || ""); setProfessionalTitle(profile.professionalTitle || "");
+      setExperience(String(profile.experience || "")); setSkills((profile.skills || []).join(", "));
+      setEducation(profile.education || ""); setModality(profile.modality || "");
+    } catch (_error) {}
+  };
+  const saveProfile = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/profile/me`, { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders() }, body: JSON.stringify({ name: name.trim(), professionalTitle: professionalTitle.trim(), experience: Number(experience) || 0, skills: skills.split(",").map((item) => item.trim()).filter(Boolean), education: education.trim(), modality: modality.trim() }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "No se pudo guardar el perfil");
+      Alert.alert("Perfil actualizado", "Tus datos se guardaron correctamente.");
+    } catch (error) { Alert.alert("Error", error.message); } finally { setLoading(false); }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -23,8 +47,8 @@ export default function CandidateProfileScreen({ navigation }) {
       <TextInput style={styles.input} placeholder="Formación académica" value={education} onChangeText={setEducation} accessibilityLabel="Formación académica" />
       <TextInput style={styles.input} placeholder="Modalidad preferida: remoto, híbrido o presencial" value={modality} onChangeText={setModality} accessibilityLabel="Modalidad laboral preferida" />
 
-      <AccessibleButton title="📄 Gestionar mi CV" onPress={() => navigation.navigate("CV" )} />
-      <AccessibleButton title="💾 Guardar perfil" type="secondary" onPress={() => navigation.navigate("CandidateDashboard")} />
+      <AccessibleButton title="📄 Gestionar mi CV" onPress={() => navigation.navigate("CV")} />
+      <AccessibleButton title={loading ? "Guardando..." : "💾 Guardar perfil"} type="secondary" onPress={saveProfile} disabled={loading} />
     </ScrollView>
   );
 }

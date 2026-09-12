@@ -4,6 +4,7 @@ import { Picker } from "@react-native-picker/picker";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { setSessionToken } from "../config/session";
 
 const AUTH_URL = `${API_URL}/auth`;
 const COUNTRIES = [
@@ -48,8 +49,9 @@ export default function CandidateRegister({ navigation }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo completar el registro");
+      setSessionToken(data.token);
       Alert.alert("Registro correcto", "Tu cuenta y perfil de candidato fueron creados.", [
-        { text: "Continuar", onPress: () => navigation.replace("CandidateDashboard") }
+        { text: "Continuar", onPress: () => navigation.replace("CandidateDashboard", { userId: data.user.id, token: data.token }) }
       ]);
     } catch (error) {
       Alert.alert("Error de registro", error.message || "No se pudo conectar con el servidor.");

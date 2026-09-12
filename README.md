@@ -21,6 +21,14 @@ La API y el cliente se despliegan de forma independiente. Antes de publicar, con
 3. Despliega el directorio `backend` con Node.js 20 o superior. El proceso de inicio es `npm start`; el proveedor debe asignar `PORT`.
 4. Comprueba la disponibilidad en `GET /health`. Una respuesta satisfactoria es `{ "status": "ok", "database": "connected" }`.
 
+Para desarrollo local también puedes iniciar MongoDB y la API juntos:
+
+```bash
+docker compose up --build
+```
+
+Esto crea un volumen persistente llamado `mongo_data`. Antes de desplegar, reemplaza `JWT_SECRET` por un valor largo y aleatorio; nunca uses el valor de ejemplo en producción.
+
 También se incluye un contenedor para hosts compatibles con Docker:
 
 ```bash
@@ -28,7 +36,7 @@ docker build -t incluwork-api ./backend
 docker run --rm -p 3000:3000 --env-file backend/.env incluwork-api
 ```
 
-> Los CV se guardan en `backend/uploads`. Para producción usa un volumen persistente o sustituye el almacenamiento local por un servicio de objetos antes de escalar a múltiples réplicas.
+> Los CV se guardan en `backend/uploads`. El servidor elimina el archivo local previo al reemplazarlo. Para producción usa un volumen persistente o sustituye el almacenamiento local por un servicio de objetos antes de escalar a múltiples réplicas.
 
 ### Aplicación Expo
 
@@ -60,3 +68,9 @@ cd backend && npm ci && npm run dev
 ```
 
 En otra terminal, ejecuta `cd mobile && npm ci && npm run start`. Para usar un dispositivo físico, sustituye `localhost` en `mobile/.env` por la IP accesible de tu equipo.
+
+## Seguridad y verificación
+
+- La API usa tokens JWT: todas las operaciones que alteran perfiles, ofertas, postulaciones o CV requieren `Authorization: Bearer <token>`.
+- Las empresas solo pueden gestionar sus propias ofertas y postulaciones; los candidatos solo pueden postularse y actualizar su propio CV.
+- Ejecuta las comprobaciones del backend con `cd backend && npm run check && npm test`.

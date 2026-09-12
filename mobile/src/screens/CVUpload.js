@@ -4,14 +4,13 @@ import * as DocumentPicker from "expo-document-picker";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { authHeaders } from "../config/session";
 
 const CV_URL = `${API_URL}/cv`;
 
 export default function CVUpload({ navigation, route }) {
   const [cvName, setCvName] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const candidateId = route?.params?.candidateId;
 
   const chooseCV = async () => {
     try {
@@ -29,11 +28,6 @@ export default function CVUpload({ navigation, route }) {
   };
 
   const uploadCV = async (file) => {
-    if (!candidateId) {
-      Alert.alert("Falta candidato", "No se encontró el candidato asociado.");
-      return;
-    }
-
     setLoading(true);
     try {
       const formData = new FormData();
@@ -43,8 +37,9 @@ export default function CVUpload({ navigation, route }) {
         type: file.mimeType || "application/pdf"
       });
 
-      const response = await fetch(`${CV_URL}/${candidateId}`, {
+      const response = await fetch(`${CV_URL}/me`, {
         method: "POST",
+        headers: authHeaders(),
         body: formData
       });
 

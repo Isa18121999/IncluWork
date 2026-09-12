@@ -3,6 +3,7 @@ import { Alert, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
+import { authHeaders } from "../config/session";
 
 const JOBS_URL = `${API_URL}/company/jobs`;
 
@@ -21,7 +22,7 @@ export default function CreateJobScreen({ navigation }) {
     try {
       const response = await fetch(JOBS_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           title: title.trim(), area: area.trim(), modality: modality.trim(),
           requirements: requirements.split(",").map((item) => item.trim()).filter(Boolean),

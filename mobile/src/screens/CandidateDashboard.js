@@ -15,8 +15,7 @@ export default function CandidateDashboard({ navigation }) {
       </View>
       <AccessibleButton title="🔎 Buscar empleos" onPress={() => navigation.navigate("Jobs")} />
       <AccessibleButton title="📄 Mis postulaciones" type="secondary" onPress={() => navigation.navigate("Applications")} />
-      <AccessibleButton title="💬 Mensajes" onPress={() => navigation.navigate("Chat")} />
-      <AccessibleButton title="♿ Accesibilidad" onPress={() => navigation.navigate("Accessibility")} />
+      <AccessibleButton title="👤 Editar mi perfil" onPress={() => navigation.navigate("CandidateProfile")} />
     </View>
   );
 }
