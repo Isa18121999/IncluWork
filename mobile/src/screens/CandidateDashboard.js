@@ -1,9 +1,22 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Alert, View, Text, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
+import { clearSessionToken } from "../config/session";
 
 export default function CandidateDashboard({ navigation }) {
+  const handleLogout = async () => {
+    await clearSessionToken();
+    navigation.replace("Welcome");
+  };
+
+  const confirmLogout = () => {
+    Alert.alert("Cerrar sesión", "¿Quieres cerrar tu sesión?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Cerrar sesión", style: "destructive", onPress: handleLogout }
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Hola 👋</Text>
@@ -16,6 +29,7 @@ export default function CandidateDashboard({ navigation }) {
       <AccessibleButton title="🔎 Buscar empleos" onPress={() => navigation.navigate("Jobs")} />
       <AccessibleButton title="📄 Mis postulaciones" type="secondary" onPress={() => navigation.navigate("Applications")} />
       <AccessibleButton title="👤 Editar mi perfil" onPress={() => navigation.navigate("CandidateProfile")} />
+      <AccessibleButton title="🚪 Cerrar sesión" type="secondary" onPress={confirmLogout} />
     </View>
   );
 }
