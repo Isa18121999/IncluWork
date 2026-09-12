@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, View, StyleSheet } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, ActivityIndicator, ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
@@ -16,25 +16,55 @@ const CRITERIA_LABELS = {
 const STATUS_OPTIONS = ["CV visto", "Aceptado", "Rechazado"];
 
 export default function CompanyDashboardScreen({ navigation }) {
+  const [jobs, setJobs] = useState([]);
+  const [selectedJobId, setSelectedJobId] = useState(null);
   const [candidates, setCandidates] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
 
-  useEffect(() => {
-    loadCandidates();
-  }, []);
-
-  const loadCandidates = async () => {
+  const loadJobs = useCallback(async () => {
+    setLoadingJobs(true);
     try {
       const response = await fetch(`${API_URL}/company/my-jobs`, { headers: authHeaders() });
       const data = await response.json();
-      const firstJob = data[0];
-      if (!firstJob?._id) return setCandidates([]);
-      const candidatesResponse = await fetch(`${API_URL}/company/candidates/${firstJob._id}`, { headers: authHeaders() });
-      const candidatesData = await candidatesResponse.json();
-      setCandidates(candidatesResponse.ok ? candidatesData.candidates || [] : []);
+      if (!response.ok) throw new Error(data.message || "No se pudieron obtener las ofertas");
+      const companyJobs = Array.isArray(data) ? data : [];
+      setJobs(companyJobs);
+      setSelectedJobId((current) => current && companyJobs.some((job) => job._id === current) ? current : companyJobs[0]?._id || null);
+    } catch (error) {
+      setJobs([]);
+      setSelectedJobId(null);
+      setCandidates([]);
+    } finally {
+      setLoadingJobs(false);
+    }
+  }, []);
+
+  const loadCandidates = useCallback(async (jobId) => {
+    if (!jobId) {
+      setCandidates([]);
+      return;
+    }
+    setLoadingCandidates(true);
+    try {
+      const response = await fetch(`${API_URL}/company/candidates/${jobId}`, { headers: authHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "No se pudieron obtener los candidatos");
+      setCandidates(data.candidates || []);
     } catch (error) {
       setCandidates([]);
+    } finally {
+      setLoadingCandidates(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
+
+  useEffect(() => {
+    loadCandidates(selectedJobId);
+  }, [selectedJobId, loadCandidates]);
 
   const updateStatus = async (candidate, status) => {
     if (!candidate.applicationId) {
@@ -50,7 +80,6 @@ export default function CompanyDashboardScreen({ navigation }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo actualizar el estado");
-
       setCandidates((current) => current.map((item) =>
         item.applicationId === candidate.applicationId ? { ...item, status: data.status } : item
       ));
@@ -67,6 +96,8 @@ export default function CompanyDashboardScreen({ navigation }) {
     ]);
   };
 
+  const selectedJob = jobs.find((job) => job._id === selectedJobId);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>🏢 Panel Empresa</Text>
@@ -74,7 +105,26 @@ export default function CompanyDashboardScreen({ navigation }) {
 
       <AccessibleButton title="📌 Publicar oferta" onPress={() => navigation.navigate("CreateJob")} />
 
-      <Text style={styles.section}>🤖 Candidatos recomendados por IA</Text>
+      <Text style={styles.section}>💼 Mis ofertas</Text>
+      {loadingJobs && <ActivityIndicator color={colors.primary} />}
+      {!loadingJobs && !jobs.length && <Text style={styles.empty}>Aún no tienes ofertas publicadas.</Text>}
+
+      {jobs.map((job) => (
+        <View key={job._id} style={[styles.jobCard, job._id === selectedJobId && styles.jobCardSelected]}>
+          <Text style={styles.jobTitle}>{job.title}</Text>
+          {!!job.area && <Text>{job.area}</Text>}
+          {!!job.modality && <Text>Modalidad: {job.modality}</Text>}
+          <AccessibleButton
+            title={job._id === selectedJobId ? "✓ Oferta seleccionada" : "Ver candidatos"}
+            type={job._id === selectedJobId ? "secondary" : "primary"}
+            onPress={() => setSelectedJobId(job._id)}
+          />
+        </View>
+      ))}
+
+      {selectedJob && <Text style={styles.section}>🤖 Candidatos para: {selectedJob.title}</Text>}
+      {loadingCandidates && <ActivityIndicator color={colors.primary} />}
+      {!loadingCandidates && selectedJob && !candidates.length && <Text style={styles.empty}>No hay candidatos para esta oferta todavía.</Text>}
 
       {candidates.map((candidate) => (
         <View key={candidate._id || candidate.applicationId || candidate.name} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.score}% Match integral, estado ${candidate.status}`}>
@@ -119,7 +169,11 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 24, backgroundColor: colors.white },
   title: { fontSize: 28, fontWeight: "800", color: colors.primary },
   subtitle: { marginVertical: 12, color: colors.text },
-  section: { marginTop: 24, fontSize: 20, fontWeight: "800", color: colors.secondary },
+  section: { marginTop: 24, marginBottom: 8, fontSize: 20, fontWeight: "800", color: colors.secondary },
+  jobCard: { marginTop: 10, padding: 14, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 14 },
+  jobCardSelected: { borderWidth: 2 },
+  jobTitle: { fontSize: 18, fontWeight: "800" },
+  empty: { marginVertical: 12 },
   card: { marginTop: 16, padding: 16, borderWidth: 1, borderRadius: 16 },
   name: { fontSize: 18, fontWeight: "700" },
   match: { marginVertical: 8, fontWeight: "800", color: colors.success },
