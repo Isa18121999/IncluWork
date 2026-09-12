@@ -26,7 +26,12 @@ const getRecommendedCandidates = async (req, res) => {
       return {
         ...candidate.toObject(),
         score: match.score,
+        breakdown: match.breakdown,
         matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills,
+        matchedAccessibility: match.matchedAccessibility,
+        missingAccessibility: match.missingAccessibility,
+        reasons: match.reasons,
         applicationId: application?._id || null,
         status: application?.status || "No postulado"
       };
