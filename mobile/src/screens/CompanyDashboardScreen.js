@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { Alert, ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
@@ -12,6 +12,8 @@ const CRITERIA_LABELS = {
   modality: "Modalidad",
   accessibility: "Accesibilidad"
 };
+
+const STATUS_OPTIONS = ["CV visto", "Aceptado", "Rechazado"];
 
 export default function CompanyDashboardScreen({ navigation }) {
   const [candidates, setCandidates] = useState([]);
@@ -34,6 +36,37 @@ export default function CompanyDashboardScreen({ navigation }) {
     }
   };
 
+  const updateStatus = async (candidate, status) => {
+    if (!candidate.applicationId) {
+      Alert.alert("Sin postulación", "Este candidato todavía no tiene una postulación registrada para esta oferta.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/applications/${candidate.applicationId}/status`, {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "No se pudo actualizar el estado");
+
+      setCandidates((current) => current.map((item) =>
+        item.applicationId === candidate.applicationId ? { ...item, status: data.status } : item
+      ));
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const confirmStatus = (candidate, status) => {
+    const action = status === "CV visto" ? "marcar esta postulación como CV visto" : status === "Aceptado" ? "aceptar esta postulación" : "rechazar esta postulación";
+    Alert.alert("Cambiar estado", `¿Quieres ${action}?`, [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Confirmar", onPress: () => updateStatus(candidate, status) }
+    ]);
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>🏢 Panel Empresa</Text>
@@ -44,7 +77,7 @@ export default function CompanyDashboardScreen({ navigation }) {
       <Text style={styles.section}>🤖 Candidatos recomendados por IA</Text>
 
       {candidates.map((candidate) => (
-        <View key={candidate._id || candidate.applicationId || candidate.name} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.score}% Match integral`}>
+        <View key={candidate._id || candidate.applicationId || candidate.name} style={styles.card} accessible accessibilityLabel={`${candidate.name}, ${candidate.score}% Match integral, estado ${candidate.status}`}>
           <Text style={styles.name}>{candidate.name}</Text>
           <Text style={styles.match}>🤖 {candidate.score}% Match integral</Text>
 
@@ -61,8 +94,21 @@ export default function CompanyDashboardScreen({ navigation }) {
           <Text>Coinciden: {candidate.matchedAccessibility?.length ? candidate.matchedAccessibility.join(" · ") : "Ninguna"}</Text>
           <Text>Faltan: {candidate.missingAccessibility?.length ? candidate.missingAccessibility.join(" · ") : "Ninguna"}</Text>
 
-          <Text style={styles.status}>{candidate.status}</Text>
+          <Text style={styles.status}>Estado: {candidate.status}</Text>
           <AccessibleButton title="Ver CV" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
+
+          {candidate.applicationId && candidate.status !== "Rechazado" && (
+            <View style={styles.actions}>
+              {STATUS_OPTIONS.filter((status) => status !== candidate.status).map((status) => (
+                <AccessibleButton
+                  key={status}
+                  title={status === "CV visto" ? "👁 Marcar CV visto" : status === "Aceptado" ? "✅ Aceptar" : "❌ Rechazar"}
+                  type="secondary"
+                  onPress={() => confirmStatus(candidate, status)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       ))}
     </ScrollView>
@@ -79,5 +125,6 @@ const styles = StyleSheet.create({
   match: { marginVertical: 8, fontWeight: "800", color: colors.success },
   subsection: { marginTop: 12, marginBottom: 4, fontWeight: "800" },
   detail: { marginTop: 2 },
-  status: { marginTop: 12, fontWeight: "700" }
+  status: { marginTop: 12, fontWeight: "700" },
+  actions: { marginTop: 8 }
 });
