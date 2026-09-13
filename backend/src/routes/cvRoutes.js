@@ -6,6 +6,7 @@ const fs = require("fs");
 const Candidate = require("../models/Candidate");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { removeLocalCv } = require("../storage/cvStorage");
+const { parseCv } = require("../services/cvParser");
 
 const uploadDirectory = path.join(__dirname, "..", "..", "uploads", "cv");
 fs.mkdirSync(uploadDirectory, { recursive: true });
@@ -39,12 +40,33 @@ router.post("/me", requireAuth, requireRole("candidate"), upload.single("cv"), a
       return res.status(404).json({ message: "Candidato no encontrado" });
     }
 
+    let extraction = { extracted: false, textLength: 0, profile: {} };
+    try {
+      extraction = parseCv(req.file.path);
+    } catch (parseError) {
+      console.warn("No se pudo extraer el perfil del CV:", parseError.message);
+    }
+
     removeLocalCv(candidate.cvUrl);
     candidate.cvUrl = `/uploads/cv/${req.file.filename}`;
+
+    const profile = extraction.profile || {};
+    if (profile.experience !== undefined) candidate.experience = profile.experience;
+    if (profile.education) candidate.education = profile.education;
+    if (profile.modality) candidate.modality = profile.modality;
+    if (profile.skills?.length) candidate.skills = profile.skills;
+    if (profile.accessibility?.length) candidate.accessibility = profile.accessibility;
+
     await candidate.save();
 
-    res.json({ message: "CV actualizado", candidate });
+    res.json({
+      message: "CV actualizado",
+      extracted: extraction.extracted,
+      extractedFields: Object.keys(profile),
+      candidate
+    });
   } catch (error) {
+    if (req.file?.path) fs.unlink(req.file.path, () => {});
     res.status(500).json({ message: error.message });
   }
 });
