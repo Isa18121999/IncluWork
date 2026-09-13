@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
+const { execFileSync } = require("child_process");
 
 const SKILLS = [
   "javascript", "typescript", "react", "react native", "node.js", "nodejs", "python", "java", "kotlin",
@@ -13,6 +14,13 @@ const ACCESSIBILITY = [
   "subtítulos", "subtitulos", "baño accesible", "horario flexible", "teletrabajo", "trabajo remoto"
 ];
 
+const MONTHS = {
+  enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6,
+  julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10, noviembre: 11, diciembre: 12,
+  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
+  july: 7, august: 8, september: 9, october: 10, november: 11, december: 12
+};
+
 const normalize = (value) => value
   .toLowerCase()
   .normalize("NFD")
@@ -22,7 +30,7 @@ const normalize = (value) => value
 
 const unique = (items) => [...new Set(items.filter(Boolean))];
 
-function extractPdfText(buffer) {
+function extractPdfText(buffer, filePath) {
   const raw = buffer.toString("latin1");
   const texts = [];
   const textRegex = /BT([\s\S]*?)ET/g;
@@ -42,7 +50,18 @@ function extractPdfText(buffer) {
     }
   }
 
-  return texts.join(" ");
+  const rawText = texts.join(" ").trim();
+  if (rawText.length >= 120 && /[a-zA-Z]{3,}/.test(rawText)) return rawText;
+
+  try {
+    const extracted = execFileSync("pdftotext", ["-layout", filePath, "-"], {
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024
+    }).trim();
+    return extracted || rawText;
+  } catch (error) {
+    return rawText;
+  }
 }
 
 function extractDocxText(buffer) {
@@ -90,30 +109,63 @@ function extractText(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const buffer = fs.readFileSync(filePath);
 
-  if (extension === ".pdf") return extractPdfText(buffer);
+  if (extension === ".pdf") return extractPdfText(buffer, filePath);
   if (extension === ".docx") return extractDocxText(buffer);
   return "";
 }
 
+function containsTerm(text, term) {
+  const normalizedTerm = normalize(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${normalizedTerm}([^a-z0-9]|$)`, "i").test(text);
+}
+
 function findSkills(text) {
   const normalized = normalize(text);
-  return unique(SKILLS.filter((skill) => normalized.includes(normalize(skill))));
+  return unique(SKILLS.filter((skill) => containsTerm(normalized, skill)));
 }
 
 function findAccessibility(text) {
   const normalized = normalize(text);
-  return unique(ACCESSIBILITY.filter((item) => normalized.includes(normalize(item))));
+  return unique(ACCESSIBILITY.filter((item) => containsTerm(normalized, item)));
+}
+
+function dateToMonth(month, year) {
+  return Number(year) * 12 + MONTHS[normalize(month)] - 1;
 }
 
 function findExperience(text) {
   const normalized = normalize(text);
   const matches = [...normalized.matchAll(/(?:experiencia|experience)[^\n]{0,80}?(\d+)\s*(?:anos|año|years?)/g)];
-  if (!matches.length) {
-    const generic = [...normalized.matchAll(/(\d+)\s*(?:anos|año|years?)[^\n]{0,30}(?:experiencia|experience)/g)];
-    if (!generic.length) return null;
-    return Math.max(...generic.map((match) => Number(match[1])));
+  if (matches.length) return Math.max(...matches.map((match) => Number(match[1])));
+
+  const generic = [...normalized.matchAll(/(\d+)\s*(?:anos|año|years?)[^\n]{0,30}(?:experiencia|experience)/g)];
+  if (generic.length) return Math.max(...generic.map((match) => Number(match[1])));
+
+  const start = normalized.indexOf("experiencia laboral");
+  if (start < 0) return null;
+  const endCandidates = ["cursos / diplomados", "cursos/diplomados", "cursos", "idiomas"]
+    .map((marker) => normalized.indexOf(marker, start + 20))
+    .filter((index) => index >= 0);
+  const end = endCandidates.length ? Math.min(...endCandidates) : normalized.length;
+  const section = normalized.slice(start, end);
+
+  const rangeRegex = /([a-z]+)\s+(\d{4})\s*-\s*(?:(?:([a-z]+)\s+(\d{4}))|(actualidad|presente|current))/g;
+  const now = new Date();
+  const currentMonth = now.getUTCFullYear() * 12 + now.getUTCMonth();
+  let totalMonths = 0;
+  let match;
+
+  while ((match = rangeRegex.exec(section))) {
+    const startMonth = MONTHS[match[1]];
+    const startYear = Number(match[2]);
+    if (!startMonth || !startYear) continue;
+
+    const startIndex = dateToMonth(match[1], startYear);
+    const endIndex = match[5] ? currentMonth : dateToMonth(match[3], match[4]);
+    if (endIndex >= startIndex) totalMonths += endIndex - startIndex + 1;
   }
-  return Math.max(...matches.map((match) => Number(match[1])));
+
+  return totalMonths > 0 ? Math.round(totalMonths / 12) : null;
 }
 
 function findEducation(text) {
