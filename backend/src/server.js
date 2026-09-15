@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 const connectDatabase = require("./config/database");
@@ -26,15 +27,19 @@ app.use("/api/company", companyRoutes);
 app.use("/api/cv", cvRoutes);
 app.use("/api/profile", profileRoutes);
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
-    name: "IncluWork API",
+    name: "Inklu API",
     status: "running"
   });
 });
 
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", database: "connected" });
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
+    status: databaseConnected ? "ok" : "degraded",
+    database: databaseConnected ? "connected" : "disconnected"
+  });
 });
 
 app.use((error, _req, res, _next) => {
@@ -51,9 +56,9 @@ const startServer = async () => {
   try {
     if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is required");
     await connectDatabase();
-    app.listen(PORT, () => console.log(`IncluWork API running on ${PORT}`));
+    app.listen(PORT, () => console.log(`Inklu API running on ${PORT}`));
   } catch (error) {
-    console.error("Unable to start IncluWork API", error.message);
+    console.error("Unable to start Inklu API", error.message);
     process.exit(1);
   }
 };
