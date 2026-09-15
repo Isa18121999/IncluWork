@@ -6,6 +6,10 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: ./
     healthCheckPath: /health
+    disk:
+      name: incluwork-cv-storage
+      mountPath: /app/uploads
+      sizeGB: 1
     envVars:
       - key: MONGODB_URI
         sync: false
