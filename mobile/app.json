@@ -1,10 +1,16 @@
 {
   "expo": {
-    "name": "IncluWork",
-    "slug": "incluwork",
+    "name": "Inklu",
+    "slug": "inklu",
     "version": "1.0.0",
     "orientation": "portrait",
     "platforms": ["android", "ios", "web"],
+    "android": {
+      "package": "com.inklu.app"
+    },
+    "ios": {
+      "bundleIdentifier": "com.inklu.app"
+    },
     "plugins": [
       "expo-document-picker"
     ]
