@@ -6,8 +6,8 @@ import { colors } from "../theme/colors";
 export default function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.logo} accessibilityLabel="Logo IncluWork">IncluWork</Text>
-      <Text style={styles.title}>¡Bienvenidos a IncluWork!</Text>
+      <Text style={styles.logo} accessibilityLabel="Logo Inklu">Inklu</Text>
+      <Text style={styles.title}>¡Bienvenidos a Inklu!</Text>
       <Text style={styles.description}>
         Conectamos talento con oportunidades laborales inclusivas mediante tecnología accesible e inteligencia artificial.
       </Text>
