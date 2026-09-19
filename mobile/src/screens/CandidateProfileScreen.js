@@ -4,8 +4,7 @@ import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
 import { API_URL } from "../config/api";
 import { authHeaders } from "../config/session";
-
-const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+import { sanitizeName, validateName } from "../config/validation";
 
 export default function CandidateProfileScreen({ navigation }) {
   const [name, setName] = useState("");
@@ -41,7 +40,7 @@ export default function CandidateProfileScreen({ navigation }) {
     const skillList = skills.split(",").map((item) => item.trim()).filter(Boolean);
     const accessibilityList = accessibility.split(",").map((item) => item.trim()).filter(Boolean);
 
-    if (normalizedName.length < 2 || normalizedName.length > 100 || !NAME_PATTERN.test(normalizedName)) {
+    if (normalizedName.length < 2 || normalizedName.length > 100 || !validateName(normalizedName)) {
       Alert.alert("Nombre no válido", "El nombre solo puede contener letras, espacios, guiones y apóstrofes.");
       return;
     }
@@ -88,7 +87,7 @@ export default function CandidateProfileScreen({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Mi perfil profesional</Text>
       <Text style={styles.subtitle}>Completa tu perfil para mejorar tus recomendaciones y tu Match integral.</Text>
-      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Nombre completo" />
+      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={(value) => setName(sanitizeName(value))} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Cargo o profesión" value={professionalTitle} onChangeText={setProfessionalTitle} accessibilityLabel="Cargo o profesión" />
       <TextInput style={styles.input} placeholder="Años de experiencia" value={experience} onChangeText={(value) => setExperience(value.replace(/[^0-9]/g, ""))} keyboardType="numeric" maxLength={2} accessibilityLabel="Años de experiencia" />
       <TextInput style={styles.input} placeholder="Habilidades (separadas por comas)" value={skills} onChangeText={setSkills} accessibilityLabel="Habilidades" />
