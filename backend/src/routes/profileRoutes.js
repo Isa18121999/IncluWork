@@ -4,10 +4,11 @@ const Company = require("../models/Company");
 const Job = require("../models/Job");
 const calculateMatch = require("../services/matchingService");
 const { requireAuth } = require("../middleware/auth");
+const { validateName, validatePhone } = require("../validation");
 
 const router = express.Router();
-const candidateFields = ["name", "professionalTitle", "experience", "skills", "education", "modality", "accessibility"];
-const companyFields = ["name", "sector", "country", "description", "inclusionPolicy", "accessibilityOptions"];
+const candidateFields = ["name", "professionalTitle", "experience", "skills", "education", "modality", "accessibility", "phone"];
+const companyFields = ["name", "sector", "country", "description", "inclusionPolicy", "accessibilityOptions", "phone"];
 const pick = (source, fields) => Object.fromEntries(fields.filter((field) => source[field] !== undefined).map((field) => [field, source[field]]));
 
 router.get("/me", requireAuth, async (req, res) => {
@@ -46,9 +47,22 @@ router.patch("/me", requireAuth, async (req, res) => {
   try {
     const isCompany = req.user.role === "company";
     const Model = isCompany ? Company : Candidate;
-    const changes = pick(req.body, isCompany ? companyFields : candidateFields);
-    if (changes.experience !== undefined) changes.experience = Number(changes.experience) || 0;
+    const fields = isCompany ? companyFields : candidateFields;
+    const changes = pick(req.body, fields);
+
+    if (changes.name !== undefined && !isCompany && !validateName(changes.name)) {
+      return res.status(400).json({ message: "El nombre solo puede contener letras, espacios, apóstrofes o guiones" });
+    }
+    if (changes.phone !== undefined && !validatePhone(changes.phone)) {
+      return res.status(400).json({ message: "El teléfono debe contener solo números y tener entre 7 y 15 dígitos" });
+    }
+    if (changes.experience !== undefined) {
+      const experience = Number(changes.experience);
+      if (!Number.isFinite(experience) || experience < 0) return res.status(400).json({ message: "La experiencia debe ser un número mayor o igual a 0" });
+      changes.experience = experience;
+    }
     if (changes.skills !== undefined && !Array.isArray(changes.skills)) return res.status(400).json({ message: "skills debe ser una lista" });
+
     const profile = await Model.findOneAndUpdate({ userId: req.user.id }, changes, { new: true, runValidators: true });
     if (!profile) return res.status(404).json({ message: "Perfil no encontrado" });
     return res.json(profile);
