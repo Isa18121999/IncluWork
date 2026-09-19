@@ -5,6 +5,7 @@ import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 import { setSessionToken } from "../config/session";
+import { sanitizeName, sanitizePhone, validateName, validateEmail, validatePhone, validatePassword } from "../config/validation";
 
 const AUTH_URL = `${API_URL}/auth`;
 const COUNTRIES = [
@@ -17,11 +18,6 @@ const COUNTRIES = [
   { label: "🇺🇸 Estados Unidos", value: "US", document: "Acreditación oficial aplicable" },
   { label: "🌎 Otro país", value: "OTHER", document: "Certificación oficial equivalente" }
 ];
-const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\d{7,15}$/;
-const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,128}$/;
-
 export default function CandidateRegister({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,19 +36,19 @@ export default function CandidateRegister({ navigation }) {
       Alert.alert("Datos incompletos", "Completa todos los campos obligatorios.");
       return;
     }
-    if (!NAME_PATTERN.test(normalizedName)) {
+    if (!validateName(normalizedName)) {
       Alert.alert("Nombre no válido", "El nombre solo puede contener letras, espacios, guiones y apóstrofes.");
       return;
     }
-    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+    if (!validateEmail(normalizedEmail)) {
       Alert.alert("Correo no válido", "Ingresa un correo electrónico válido.");
       return;
     }
-    if (!PHONE_PATTERN.test(normalizedPhone)) {
+    if (!validatePhone(normalizedPhone)) {
       Alert.alert("Teléfono no válido", "El teléfono debe contener solo números (7 a 15 dígitos).");
       return;
     }
-    if (!PASSWORD_PATTERN.test(password)) {
+    if (!validatePassword(password)) {
       Alert.alert("Contraseña no válida", "Debe tener 8 a 128 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
       return;
     }
@@ -78,9 +74,9 @@ export default function CandidateRegister({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Registro de candidato</Text>
       <Text style={styles.subtitle}>Crea tu cuenta y completa los datos de acreditación para utilizar Inklu.</Text>
-      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Nombre completo" />
+      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={(value) => setName(sanitizeName(value))} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Correo electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Correo electrónico" />
-      <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(value.replace(/\D/g, ""))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
+      <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
       <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
       <Text style={styles.passwordHint}>8–128 caracteres · mayúscula · minúscula · número · carácter especial</Text>
       <Text style={styles.label}>País de registro</Text>
