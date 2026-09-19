@@ -15,7 +15,8 @@ router.get("/", async (req, res) => {
 
     res.json({ notifications, unreadCount });
   } catch (error) {
-    res.status(500).json({ message: "Error obteniendo notificaciones", error: error.message });
+    console.error("Notification list error", error.message);
+    res.status(500).json({ message: "Error obteniendo notificaciones" });
   }
 });
 
@@ -30,7 +31,8 @@ router.patch("/:id/read", async (req, res) => {
     if (!notification) return res.status(404).json({ message: "Notificación no encontrada" });
     res.json(notification);
   } catch (error) {
-    res.status(400).json({ message: "Notificación no válida", error: error.message });
+    console.error("Notification read error", error.message);
+    res.status(400).json({ message: "Notificación no válida" });
   }
 });
 
@@ -43,7 +45,8 @@ router.patch("/read-all", async (req, res) => {
 
     res.json({ message: "Notificaciones marcadas como leídas", modifiedCount: result.modifiedCount });
   } catch (error) {
-    res.status(500).json({ message: "Error marcando notificaciones", error: error.message });
+    console.error("Notification read-all error", error.message);
+    res.status(500).json({ message: "Error marcando notificaciones" });
   }
 });
 
