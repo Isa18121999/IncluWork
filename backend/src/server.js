@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const cvRoutes = require("./routes/cvRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 const uploadsDirectory = path.join(__dirname, "..", "uploads");
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/cv", cvRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (_req, res) => {
   res.json({
