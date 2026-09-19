@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const TOKEN_KEY = "incluwork.auth.token";
+const TOKEN_KEY = "inklu.auth.token";
 let token = null;
 
 const decodePayload = (value) => {
