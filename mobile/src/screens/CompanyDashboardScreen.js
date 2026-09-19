@@ -145,7 +145,7 @@ export default function CompanyDashboardScreen({ navigation }) {
           <Text>Faltan: {candidate.missingAccessibility?.length ? candidate.missingAccessibility.join(" · ") : "Ninguna"}</Text>
 
           <Text style={styles.status}>Estado: {candidate.status}</Text>
-          <AccessibleButton title="Ver CV" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
+          <AccessibleButton title="Revisar perfil" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
 
           {candidate.applicationId && candidate.status !== "Rechazado" && (
             <View style={styles.actions}>
