@@ -64,7 +64,7 @@ router.post("/", requireRole("candidate"), async (req, res) => {
 
 router.patch("/:id/status", requireRole("company"), async (req, res) => {
   try {
-    const allowedStatuses = ["Postulado", "CV visto", "Aceptado", "Rechazado"];
+    const allowedStatuses = ["Postulado", "CV visto", "En proceso", "Proceso finalizado"];
     if (!allowedStatuses.includes(req.body.status)) {
       return res.status(400).json({ message: "Estado de postulación no válido" });
     }
