@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Alert, ScrollView, Text, TextInput, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
@@ -17,9 +18,7 @@ export default function CandidateProfileScreen({ navigation }) {
   const [accessibility, setAccessibility] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { loadProfile(); }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/profile/me`, { headers: authHeaders() });
       const profile = await response.json();
@@ -33,7 +32,11 @@ export default function CandidateProfileScreen({ navigation }) {
       setModality(profile.modality || "");
       setAccessibility((profile.accessibility || []).join(", "));
     } catch (_error) {}
-  };
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    loadProfile();
+  }, [loadProfile]));
 
   const saveProfile = async () => {
     const normalizedName = name.trim();
