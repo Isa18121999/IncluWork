@@ -31,7 +31,21 @@ router.get("/", async (req, res) => {
       .populate("candidateId", "name professionalTitle skills experience education modality accessibility")
       .sort({ createdAt: -1 });
 
-    res.json(applications);
+    const enrichedApplications = applications.map((application) => {
+      const item = application.toObject();
+      if (item.candidateId && item.jobId) {
+        const match = calculateMatch(item.candidateId, item.jobId);
+        item.matchScore = match.score;
+        item.matchBreakdown = match.breakdown;
+        item.matchedSkills = match.matchedSkills;
+        item.missingSkills = match.missingSkills;
+        item.matchedAccessibility = match.matchedAccessibility;
+        item.missingAccessibility = match.missingAccessibility;
+      }
+      return item;
+    });
+
+    res.json(enrichedApplications);
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo postulaciones", error: error.message });
   }
