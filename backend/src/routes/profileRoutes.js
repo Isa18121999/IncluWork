@@ -18,7 +18,7 @@ router.get("/me", requireAuth, async (req, res) => {
     const profile = await Model.findOne({ userId: req.user.id });
     if (!profile) return res.status(404).json({ message: "Perfil no encontrado" });
     return res.json(profile);
-  } catch (error) { return res.status(500).json({ message: "Error obteniendo perfil", error: error.message }); }
+  } catch (error) { console.error("Profile fetch error", error.message); return res.status(500).json({ message: "Error obteniendo perfil" }); }
 });
 
 router.get("/matches", requireAuth, async (req, res) => {
@@ -32,7 +32,7 @@ router.get("/matches", requireAuth, async (req, res) => {
       return { ...job.toObject(), score: match.score, breakdown: match.breakdown, matchedSkills: match.matchedSkills, missingSkills: match.missingSkills, matchedAccessibility: match.matchedAccessibility, missingAccessibility: match.missingAccessibility, reasons: match.reasons };
     }).sort((a, b) => b.score - a.score);
     return res.json({ candidateId: candidate._id, matches });
-  } catch (error) { return res.status(500).json({ message: "Error obteniendo matches", error: error.message }); }
+  } catch (error) { console.error("Profile matches error", error.message); return res.status(500).json({ message: "Error obteniendo matches" }); }
 });
 
 router.patch("/me", requireAuth, async (req, res) => {
@@ -93,7 +93,7 @@ router.patch("/me", requireAuth, async (req, res) => {
     if (Object.keys(userChanges).length) await User.findByIdAndUpdate(req.user.id, userChanges, { runValidators: true });
 
     return res.json(profile);
-  } catch (error) { return res.status(500).json({ message: "Error actualizando perfil", error: error.message }); }
+  } catch (error) { console.error("Profile update error", error.message); return res.status(500).json({ message: "Error actualizando perfil" }); }
 });
 
 module.exports = router;
