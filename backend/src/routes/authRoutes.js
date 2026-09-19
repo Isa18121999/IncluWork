@@ -5,8 +5,9 @@ const router = express.Router();
 const User = require("../models/User");
 const Candidate = require("../models/Candidate");
 const Company = require("../models/Company");
+const { validateName, validateEmail, validatePhone, validatePassword } = require("../validation");
 
-const publicUser = (user) => ({ id: user._id, name: user.name, email: user.email, role: user.role, active: user.active });
+const publicUser = (user) => ({ id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role, active: user.active });
 const issueToken = (user) => jwt.sign({ id: user._id.toString(), role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
 
 const hashPassword = (password, salt = crypto.randomBytes(16).toString("hex")) => {
@@ -25,20 +26,36 @@ const verifyPassword = (password, storedPassword) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role, country, accreditationType, accreditationNumber } = req.body;
-    if (!name || !email || !password || String(password).length < 8) {
-      return res.status(400).json({ message: "Nombre, email y una contraseña de al menos 8 caracteres son obligatorios" });
+    const { name, email, phone, password, role, country, accreditationType, accreditationNumber } = req.body;
+    const normalizedName = String(name || "").trim();
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedPhone = String(phone || "").trim();
+
+    if (!normalizedName || !normalizedEmail || !normalizedPhone || !password) {
+      return res.status(400).json({ message: "Nombre, email, teléfono y contraseña son obligatorios" });
+    }
+    if (role !== "company" && !validateName(normalizedName)) {
+      return res.status(400).json({ message: "El nombre solo puede contener letras, espacios, apóstrofes o guiones" });
+    }
+    if (!validateEmail(normalizedEmail)) {
+      return res.status(400).json({ message: "Ingresa un email válido" });
+    }
+    if (!validatePhone(normalizedPhone)) {
+      return res.status(400).json({ message: "El teléfono debe contener solo números y tener entre 7 y 15 dígitos" });
+    }
+    if (!validatePassword(password)) {
+      return res.status(400).json({ message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial" });
     }
 
-    const normalizedEmail = String(email).trim().toLowerCase();
     if (await User.findOne({ email: normalizedEmail })) {
       return res.status(409).json({ message: "El email ya está registrado" });
     }
 
     const normalizedRole = role === "company" ? "company" : "candidate";
     const user = await User.create({
-      name: String(name).trim(),
+      name: normalizedName,
       email: normalizedEmail,
+      phone: normalizedPhone,
       password: hashPassword(password),
       role: normalizedRole,
       active: true
@@ -50,12 +67,13 @@ router.post("/register", async (req, res) => {
         userId: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         country: country || "",
         accreditationType: accreditationType || "",
         accreditationNumber: accreditationNumber || ""
       });
     } else {
-      profile = await Company.create({ userId: user._id, name: user.name, email: user.email });
+      profile = await Company.create({ userId: user._id, name: user.name, email: user.email, phone: user.phone });
     }
 
     res.status(201).json({
