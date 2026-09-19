@@ -24,6 +24,7 @@ export default function CandidateDashboard({ navigation }) {
       {loading ? <ActivityIndicator color={colors.primary} /> : matches.length ? matches.map((job) => <View key={job._id} style={styles.matchRow}><View style={styles.matchInfo}><Text style={styles.jobTitle}>{job.title}</Text><Text>{job.companyId?.name || "Empresa"}</Text><Text style={styles.breakdownTitle}>Match integral</Text>{Object.entries(job.breakdown || {}).map(([key, value]) => <Text key={key} style={styles.breakdown}>• {criteriaLabels[key] || key}: {value}%</Text>)}{job.missingSkills?.length > 0 && <Text style={styles.warning}>⚠️ Faltan: {job.missingSkills.join(" · ")}</Text>}</View><Text style={styles.match}>{job.score}%</Text></View>) : <Text style={styles.caption}>Completa tus habilidades para encontrar coincidencias.</Text>}
     </View>
     <AccessibleButton title="🔎 Buscar empleos" onPress={() => navigation.navigate("Jobs")} />
+    <AccessibleButton title={`🔔 Notificaciones${unreadCount ? ` (${unreadCount})` : ""}`} type="secondary" onPress={() => navigation.navigate("Notifications")} />
     <AccessibleButton title="📄 Mis postulaciones" type="secondary" onPress={() => navigation.navigate("Applications")} />
     <AccessibleButton title="👤 Editar mi perfil" onPress={() => navigation.navigate("CandidateProfile")} />
     <AccessibleButton title="🚪 Cerrar sesión" type="secondary" onPress={confirmLogout} />
