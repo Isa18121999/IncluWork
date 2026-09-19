@@ -17,6 +17,7 @@ const ALLOWED_MIME_TYPES = [
 
 export default function CVUpload({ navigation, route }) {
   const [cvName, setCvName] = useState("");
+  const [extractedFields, setExtractedFields] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const chooseCV = async () => {
@@ -66,7 +67,19 @@ export default function CVUpload({ navigation, route }) {
       if (!response.ok) throw new Error(data.message || "Error subiendo CV");
 
       setCvName(file.name);
-      Alert.alert("CV actualizado", "Tu CV fue guardado correctamente.");
+      setExtractedFields(data.extractedFields || []);
+      const fieldLabels = {
+        experience: "experiencia",
+        education: "educación",
+        modality: "modalidad",
+        skills: "habilidades",
+        accessibility: "accesibilidad"
+      };
+      const extracted = (data.extractedFields || []).map((field) => fieldLabels[field] || field);
+      const detail = extracted.length
+        ? "Campos detectados: " + extracted.join(", ") + "."
+        : "No se detectaron campos profesionales automáticamente; puedes completar tu perfil manualmente.";
+      Alert.alert("CV actualizado", "Tu CV fue guardado correctamente.\n\n" + detail);
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -82,6 +95,17 @@ export default function CVUpload({ navigation, route }) {
       </Text>
 
       {cvName ? <Text style={styles.file}>{cvName}</Text> : <Text style={styles.empty}>No tienes un CV cargado.</Text>}
+      {extractedFields.length > 0 ? (
+        <Text style={styles.extracted}>
+          ✓ Perfil actualizado con: {extractedFields.map((field) => ({
+            experience: "experiencia",
+            education: "educación",
+            modality: "modalidad",
+            skills: "habilidades",
+            accessibility: "accesibilidad"
+          }[field] || field)).join(", ")}
+        </Text>
+      ) : null}
 
       <AccessibleButton title={loading ? "Subiendo..." : "📤 Subir CV"} onPress={chooseCV} disabled={loading} />
       <AccessibleButton title="🔄 Actualizar CV" type="secondary" onPress={chooseCV} disabled={loading} />
@@ -95,5 +119,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 30, fontWeight: "800", color: colors.primary, marginBottom: 12 },
   description: { fontSize: 16, lineHeight: 24, color: colors.text, marginBottom: 20 },
   empty: { fontSize: 16, color: colors.text, marginBottom: 20 },
-  file: { fontSize: 16, fontWeight: "700", color: colors.success, marginBottom: 20 }
+  file: { fontSize: 16, fontWeight: "700", color: colors.success, marginBottom: 10 },
+  extracted: { fontSize: 15, lineHeight: 22, color: colors.text, marginBottom: 20 }
 });
