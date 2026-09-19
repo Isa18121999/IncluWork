@@ -21,6 +21,18 @@ export default function CompanyDashboardScreen({ navigation }) {
   const [candidates, setCandidates] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/notifications`, { headers: authHeaders() });
+      if (!response.ok) return;
+      const data = await response.json();
+      setUnreadCount(Number(data.unreadCount || 0));
+    } catch (_error) {
+      setUnreadCount(0);
+    }
+  }, []);
 
   const loadJobs = useCallback(async () => {
     setLoadingJobs(true);
@@ -60,7 +72,8 @@ export default function CompanyDashboardScreen({ navigation }) {
 
   useEffect(() => {
     loadJobs();
-  }, [loadJobs]);
+    loadUnreadCount();
+  }, [loadJobs, loadUnreadCount]);
 
   useEffect(() => {
     loadCandidates(selectedJobId);
