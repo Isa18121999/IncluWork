@@ -6,6 +6,7 @@ import { colors } from "../theme/colors";
 import { setSessionToken } from "../config/session";
 
 const AUTH_URL = `${API_URL}/auth`;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -13,41 +14,35 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password) {
       Alert.alert("Datos incompletos", "Ingresa tu email y contraseña.");
+      return;
+    }
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      Alert.alert("Correo no válido", "Ingresa un correo electrónico válido.");
       return;
     }
     setLoading(true);
     try {
-      const response = await fetch(`${AUTH_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password })
-      });
+      const response = await fetch(`${AUTH_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: normalizedEmail, password }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo iniciar sesión");
-
       setSessionToken(data.token);
       const params = { userId: data.user.id, token: data.token };
-      if (data.user.role === "company") {
-        navigation.replace("CompanyDashboard", params);
-      } else if (data.user.role === "candidate") {
-        navigation.replace("CandidateDashboard", params);
-      } else {
-        Alert.alert("Rol no disponible");
-      }
+      if (data.user.role === "company") navigation.replace("CompanyDashboard", params);
+      else if (data.user.role === "candidate") navigation.replace("CandidateDashboard", params);
+      else Alert.alert("Rol no disponible");
     } catch (error) {
       Alert.alert("Error de inicio de sesión", error.message || "Error de conexión");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <Text style={styles.title}>Iniciar sesión</Text>
-        <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
+        <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
         <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry />
         <AccessibleButton title={loading ? "Ingresando..." : "Iniciar sesión"} onPress={handleLogin} disabled={loading} />
       </View>
