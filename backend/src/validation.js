@@ -1,9 +1,12 @@
 const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^\d{7,15}$/;
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,128}$/;
 
-const validateName = (value) => NAME_REGEX.test(String(value || "").trim());
+const validateName = (value) => {
+  const name = String(value || "").trim();
+  return name.length >= 2 && name.length <= 100 && NAME_REGEX.test(name);
+};
 const validateEmail = (value) => EMAIL_REGEX.test(String(value || "").trim().toLowerCase());
 const validatePhone = (value) => PHONE_REGEX.test(String(value || "").trim());
 const validatePassword = (value) => PASSWORD_REGEX.test(String(value || ""));
