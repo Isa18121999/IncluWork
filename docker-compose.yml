@@ -5,7 +5,7 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: incluwork
+      MONGO_INITDB_DATABASE: inklu
     volumes:
       - mongo_data:/data/db
   api:
@@ -15,7 +15,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      MONGODB_URI: mongodb://mongodb:27017/incluwork
+      MONGODB_URI: mongodb://mongodb:27017/inklu
       JWT_SECRET: change-this-in-production
       CORS_ORIGIN: http://localhost:8081
 volumes:
