@@ -2,11 +2,13 @@ import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../theme/colors";
 
-export default function AccessibleButton({ title, onPress, type = "primary" }) {
+export default function AccessibleButton({ title, onPress, type = "primary", disabled = false }) {
   return (
     <TouchableOpacity
-      style={[styles.button, type === "secondary" && styles.secondary]}
+      style={[styles.button, type === "secondary" && styles.secondary, disabled && styles.disabled]}
       onPress={onPress}
+      disabled={disabled}
+      activeOpacity={disabled ? 1 : 0.7}
       accessibilityRole="button"
       accessibilityLabel={title}
       accessible
@@ -27,5 +29,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   secondary: { backgroundColor: colors.success },
+  disabled: { opacity: 0.5 },
   text: { color: colors.white, fontSize: 18, fontWeight: "700" },
 });
