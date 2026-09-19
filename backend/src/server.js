@@ -42,8 +42,8 @@ app.get("/health", (_req, res) => {
 });
 
 app.use((error, _req, res, _next) => {
-  if (error.code === "LIMIT_FILE_SIZE" || error.message === "Formato no permitido") {
-    return res.status(400).json({ message: error.message });
+  if (error.code?.startsWith("LIMIT_") || error.code === "INVALID_FILE_TYPE") {
+    return res.status(400).json({ message: error.message || "Solicitud de archivo no válida" });
   }
   console.error("Unhandled request error", error);
   res.status(500).json({ message: "Error interno del servidor" });
