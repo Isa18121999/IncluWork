@@ -68,13 +68,17 @@ router.post("/", requireRole("candidate"), async (req, res) => {
 
     const company = await Company.findById(job.companyId).select("userId name");
     if (company?.userId) {
-      await createNotification({
-        userId: company.userId,
-        type: "new_application",
-        title: "Nueva postulación",
-        message: `${candidate.name} se postuló a ${job.title}`,
-        data: { applicationId: application._id, jobId: job._id, candidateId: candidate._id }
-      });
+      try {
+        await createNotification({
+          userId: company.userId,
+          type: "new_application",
+          title: "Nueva postulación",
+          message: `${candidate.name} se postuló a ${job.title}`,
+          data: { applicationId: application._id, jobId: job._id, candidateId: candidate._id }
+        });
+      } catch (notificationError) {
+        console.error("Application notification error", notificationError.message);
+      }
     }
 
     res.status(201).json({
@@ -115,13 +119,17 @@ router.patch("/:id/status", requireRole("company"), async (req, res) => {
         };
         const message = statusMessages[application.status];
         if (message) {
-          await createNotification({
-            userId: candidate.userId,
-            type: "application_status",
-            title: `Postulación: ${application.status}`,
-            message,
-            data: { applicationId: application._id, jobId: application.jobId._id, status: application.status }
-          });
+          try {
+            await createNotification({
+              userId: candidate.userId,
+              type: "application_status",
+              title: `Postulación: ${application.status}`,
+              message,
+              data: { applicationId: application._id, jobId: application.jobId._id, status: application.status }
+            });
+          } catch (notificationError) {
+            console.error("Status notification error", notificationError.message);
+          }
         }
       }
     }
