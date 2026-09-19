@@ -7,6 +7,13 @@ import { colors } from "../theme/colors";
 import { authHeaders } from "../config/session";
 
 const CV_URL = `${API_URL}/cv`;
+const MAX_CV_SIZE = 10 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+];
 
 export default function CVUpload({ navigation, route }) {
   const [cvName, setCvName] = useState("");
@@ -20,7 +27,19 @@ export default function CVUpload({ navigation, route }) {
       });
 
       if (!result.canceled) {
-        await uploadCV(result.assets[0]);
+        const file = result.assets?.[0];
+        if (!file) return;
+        const extension = `.${String(file.name || "").split(".").pop()}`.toLowerCase();
+        const mimeType = file.mimeType || "";
+        if (!ALLOWED_EXTENSIONS.includes(extension) || (mimeType && !ALLOWED_MIME_TYPES.includes(mimeType))) {
+          Alert.alert("Formato no válido", "El CV debe ser PDF, DOC o DOCX.");
+          return;
+        }
+        if (file.size !== undefined && file.size > MAX_CV_SIZE) {
+          Alert.alert("Archivo demasiado grande", "El CV no puede superar los 10 MB.");
+          return;
+        }
+        await uploadCV(file);
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo seleccionar el CV.");
