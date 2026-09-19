@@ -1,4 +1,4 @@
-# IncluWork
+# Inklu
 
 Plataforma móvil de empleo inclusivo para personas con discapacidad verificadas y empresas comprometidas con la inclusión laboral.
 
@@ -32,8 +32,8 @@ Esto crea un volumen persistente llamado `mongo_data`. Antes de desplegar, reemp
 También se incluye un contenedor para hosts compatibles con Docker:
 
 ```bash
-docker build -t incluwork-api ./backend
-docker run --rm -p 3000:3000 --env-file backend/.env incluwork-api
+docker build -t inklu-api ./backend
+docker run --rm -p 3000:3000 --env-file backend/.env inklu-api
 ```
 
 > Los CV se guardan en `backend/uploads`. El servidor elimina el archivo local previo al reemplazarlo. Para producción usa un volumen persistente o sustituye el almacenamiento local por un servicio de objetos antes de escalar a múltiples réplicas.
