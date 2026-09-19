@@ -4,10 +4,9 @@ import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 import { setSessionToken } from "../config/session";
+import { validateEmail } from "../config/validation";
 
 const AUTH_URL = `${API_URL}/auth`;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +18,7 @@ export default function LoginScreen({ navigation }) {
       Alert.alert("Datos incompletos", "Ingresa tu email y contraseña.");
       return;
     }
-    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+    if (!validateEmail(normalizedEmail)) {
       Alert.alert("Correo no válido", "Ingresa un correo electrónico válido.");
       return;
     }
