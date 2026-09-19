@@ -38,7 +38,7 @@ export default function CandidateCVScreen({ route, navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>📄 Revisión de CV</Text>
+      <Text style={styles.title}>👤 Revisión de candidato</Text>
       <Text style={styles.name}>{candidate?.name || "Candidato"}</Text>
       <Text style={styles.match}>🤖 {candidate?.score || candidate?.match || 0}% Match IA</Text>
       <Text style={styles.section}>Perfil profesional</Text>
