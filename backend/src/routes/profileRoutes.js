@@ -1,16 +1,15 @@
 const express = require("express");
 const Candidate = require("../models/Candidate");
 const Company = require("../models/Company");
+const User = require("../models/User");
 const Job = require("../models/Job");
 const calculateMatch = require("../services/matchingService");
 const { requireAuth } = require("../middleware/auth");
-
-const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
-const PHONE_PATTERN = /^\d{7,15}$/;
+const { validateName, validatePhone } = require("../validation");
 
 const router = express.Router();
-const candidateFields = ["name", "professionalTitle", "experience", "skills", "education", "modality", "accessibility"];
-const companyFields = ["name", "sector", "country", "description", "inclusionPolicy", "accessibilityOptions"];
+const candidateFields = ["name", "professionalTitle", "experience", "skills", "education", "modality", "accessibility", "phone"];
+const companyFields = ["name", "sector", "country", "description", "inclusionPolicy", "accessibilityOptions", "phone"];
 const pick = (source, fields) => Object.fromEntries(fields.filter((field) => source[field] !== undefined).map((field) => [field, source[field]]));
 
 router.get("/me", requireAuth, async (req, res) => {
@@ -44,10 +43,13 @@ router.patch("/me", requireAuth, async (req, res) => {
 
     if (!isCompany && changes.name !== undefined) {
       const name = String(changes.name).trim();
-      if (name.length < 2 || name.length > 100 || !NAME_PATTERN.test(name)) {
+      if (!validateName(name) || name.length < 2 || name.length > 100) {
         return res.status(400).json({ message: "El nombre solo puede contener letras, espacios, guiones y apóstrofes" });
       }
       changes.name = name;
+    }
+    if (changes.phone !== undefined && !validatePhone(changes.phone)) {
+      return res.status(400).json({ message: "El teléfono debe contener solo números y tener entre 7 y 15 dígitos" });
     }
     if (changes.experience !== undefined) {
       const value = Number(changes.experience);
@@ -55,15 +57,11 @@ router.patch("/me", requireAuth, async (req, res) => {
       changes.experience = value;
     }
     if (changes.skills !== undefined) {
-      if (!Array.isArray(changes.skills) || changes.skills.length > 30 || changes.skills.some((item) => typeof item !== "string" || !item.trim() || item.trim().length > 100)) {
-        return res.status(400).json({ message: "Las habilidades deben ser una lista válida de hasta 30 elementos" });
-      }
+      if (!Array.isArray(changes.skills) || changes.skills.length > 30 || changes.skills.some((item) => typeof item !== "string" || !item.trim() || item.trim().length > 100)) return res.status(400).json({ message: "Las habilidades deben ser una lista válida de hasta 30 elementos" });
       changes.skills = changes.skills.map((item) => item.trim());
     }
     if (changes.accessibility !== undefined) {
-      if (!Array.isArray(changes.accessibility) || changes.accessibility.length > 30 || changes.accessibility.some((item) => typeof item !== "string" || !item.trim() || item.trim().length > 100)) {
-        return res.status(400).json({ message: "Las necesidades de accesibilidad deben ser una lista válida" });
-      }
+      if (!Array.isArray(changes.accessibility) || changes.accessibility.length > 30 || changes.accessibility.some((item) => typeof item !== "string" || !item.trim() || item.trim().length > 100)) return res.status(400).json({ message: "Las necesidades de accesibilidad deben ser una lista válida" });
       changes.accessibility = changes.accessibility.map((item) => item.trim());
     }
     if (changes.modality !== undefined) {
@@ -88,6 +86,12 @@ router.patch("/me", requireAuth, async (req, res) => {
 
     const profile = await Model.findOneAndUpdate({ userId: req.user.id }, changes, { new: true, runValidators: true });
     if (!profile) return res.status(404).json({ message: "Perfil no encontrado" });
+
+    const userChanges = {};
+    if (changes.name !== undefined) userChanges.name = changes.name;
+    if (changes.phone !== undefined) userChanges.phone = changes.phone;
+    if (Object.keys(userChanges).length) await User.findByIdAndUpdate(req.user.id, userChanges, { runValidators: true });
+
     return res.json(profile);
   } catch (error) { return res.status(500).json({ message: "Error actualizando perfil", error: error.message }); }
 });
