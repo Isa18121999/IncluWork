@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { ActivityIndicator, Alert, ScrollView, View, Text, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
@@ -20,16 +21,22 @@ export default function CandidateDashboard({ navigation }) {
       setUnreadCount(0);
     }
   }, []);
-  useEffect(() => {
-    fetch(`${API_URL}/profile/matches`, { headers: authHeaders() })
-      .then(async (response) => response.ok ? response.json() : { matches: [] })
-      .then((data) => setMatches((data.matches || []).slice(0, 3)))
-      .catch(() => setMatches([]))
-      .finally(() => setLoading(false));
+  const loadMatches = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/profile/matches`, { headers: authHeaders() });
+      const data = response.ok ? await response.json() : { matches: [] };
+      setMatches((data.matches || []).slice(0, 3));
+    } catch (_error) {
+      setMatches([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
+    loadMatches();
     loadUnreadCount();
-  }, [loadUnreadCount]);
+  }, [loadMatches, loadUnreadCount]));
   const handleLogout = async () => { await clearSessionToken(); navigation.replace("Welcome"); };
   const confirmLogout = () => Alert.alert("Cerrar sesión", "¿Quieres cerrar tu sesión?", [{ text: "Cancelar", style: "cancel" }, { text: "Cerrar sesión", style: "destructive", onPress: handleLogout }]);
   return <ScrollView contentContainerStyle={styles.container}>
