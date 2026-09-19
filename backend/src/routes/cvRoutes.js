@@ -71,4 +71,42 @@ router.post("/me", requireAuth, requireRole("candidate"), upload.single("cv"), a
   }
 });
 
+router.get("/application/:applicationId", requireAuth, requireRole("company"), async (req, res) => {
+  try {
+    const Application = require("../models/Application");
+    const Job = require("../models/Job");
+    const Company = require("../models/Company");
+
+    const application = await Application.findById(req.params.applicationId);
+    if (!application) return res.status(404).json({ message: "Postulación no encontrada" });
+
+    const job = await Job.findById(application.jobId);
+    if (!job) return res.status(404).json({ message: "Oferta no encontrada" });
+
+    const company = await Company.findOne({ userId: req.user.id });
+    if (!company || job.companyId.toString() !== company._id.toString()) {
+      return res.status(403).json({ message: "No puedes acceder al CV de esta postulación" });
+    }
+
+    const candidate = await Candidate.findById(application.candidateId).select("cvUrl");
+    if (!candidate?.cvUrl || !candidate.cvUrl.startsWith("/uploads/cv/")) {
+      return res.status(404).json({ message: "El candidato no tiene un CV disponible" });
+    }
+
+    const filename = path.basename(candidate.cvUrl);
+    const filePath = path.join(uploadDirectory, filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "El archivo CV no está disponible" });
+    }
+
+    return res.sendFile(filePath, {
+      headers: {
+        "Content-Disposition": "inline; filename=\"" + filename + "\""
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error accediendo al CV" });
+  }
+});
+
 module.exports = router;
