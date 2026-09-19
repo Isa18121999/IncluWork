@@ -21,17 +21,68 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+    fields: 0,
+    parts: 1,
+    fieldNameSize: 100,
+    fieldSize: 64 * 1024,
+    headerPairs: 200,
+    fieldNestingDepth: 5,
+    fieldArrayIndexLimit: 20
+  },
+  preservePath: false,
   fileFilter: (req, file, cb) => {
-    const allowed = [".pdf", ".doc", ".docx"];
+    const allowed = {
+      ".pdf": ["application/pdf"],
+      ".doc": ["application/msword", "application/octet-stream"],
+      ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/octet-stream"]
+    };
     const ext = path.extname(file.originalname).toLowerCase();
-    cb(allowed.includes(ext) ? null : new Error("Formato no permitido"), allowed.includes(ext));
+    const expectedMimeTypes = allowed[ext];
+    if (!expectedMimeTypes || (file.mimetype && !expectedMimeTypes.includes(file.mimetype))) {
+      return cb(Object.assign(new Error("Tipo de archivo no permitido"), { code: "INVALID_FILE_TYPE" }), false);
+    }
+    return cb(null, true);
   }
 });
+
+const validateCvSignature = async (filePath, extension) => {
+  const handle = await fs.promises.open(filePath, "r");
+  try {
+    const header = Buffer.alloc(8);
+    await handle.read(header, 0, 8, 0);
+
+    if (extension === ".pdf") {
+      return header.subarray(0, 5).toString("ascii") === "%PDF-";
+    }
+
+    const isOle = header.equals(Buffer.from([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]));
+    if (extension === ".doc") return isOle;
+
+    if (extension === ".docx") {
+      if (header[0] !== 0x50 || header[1] !== 0x4B || header[2] !== 0x03 || header[3] !== 0x04) return false;
+      const content = await fs.promises.readFile(filePath);
+      return content.includes(Buffer.from("[Content_Types].xml")) && content.includes(Buffer.from("word/document.xml"));
+    }
+
+    return false;
+  } finally {
+    await handle.close();
+  }
+};
 
 router.post("/me", requireAuth, requireRole("candidate"), upload.single("cv"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "CV requerido" });
+
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    const validSignature = await validateCvSignature(req.file.path, extension);
+    if (!validSignature) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+      return res.status(400).json({ message: "El contenido del archivo no coincide con el formato declarado" });
+    }
 
     const candidate = await Candidate.findOne({ userId: req.user.id });
 
