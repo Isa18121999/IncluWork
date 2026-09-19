@@ -62,7 +62,7 @@ export default function CompanyRegister({ navigation }) {
       <View style={styles.container}>
         <Text style={styles.title} accessibilityRole="header">Registro de empresa</Text>
         <Text style={styles.subtitle}>Crea una cuenta para publicar oportunidades inclusivas.</Text>
-        <TextInput style={styles.input} placeholder="Nombre de la empresa" value={name} onChangeText={setName} accessibilityLabel="Nombre de la empresa" />
+        <TextInput style={styles.input} placeholder="Nombre de la empresa" value={name} onChangeText={setName} maxLength={150} accessibilityLabel="Nombre de la empresa" />
         <TextInput style={styles.input} placeholder="Email corporativo" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Email corporativo" />
         <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
         <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
