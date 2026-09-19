@@ -1,7 +1,7 @@
 FROM node:20-bookworm-slim
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends poppler-utils \
+  && apt-get install -y --no-install-recommends poppler-utils antiword \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
