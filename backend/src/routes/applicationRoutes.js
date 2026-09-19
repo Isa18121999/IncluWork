@@ -48,7 +48,8 @@ router.get("/", async (req, res) => {
 
     res.json(enrichedApplications);
   } catch (error) {
-    res.status(500).json({ message: "Error obteniendo postulaciones", error: error.message });
+    console.error("Application list error", error.message);
+    res.status(500).json({ message: "Error obteniendo postulaciones" });
   }
 });
 
@@ -88,7 +89,8 @@ router.post("/", requireRole("candidate"), async (req, res) => {
     });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: "Ya te postulaste a esta oferta" });
-    res.status(400).json({ message: "Error creando postulación", error: error.message });
+    console.error("Application create error", error.message);
+    res.status(400).json({ message: "Error creando postulación" });
   }
 });
 
@@ -136,7 +138,8 @@ router.patch("/:id/status", requireRole("company"), async (req, res) => {
 
     res.json(application);
   } catch (error) {
-    res.status(500).json({ message: "Error actualizando postulación", error: error.message });
+    console.error("Application status error", error.message);
+    res.status(500).json({ message: "Error actualizando postulación" });
   }
 });
 
