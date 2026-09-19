@@ -4,12 +4,9 @@ import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
 import { colors } from "../theme/colors";
 import { setSessionToken } from "../config/session";
+import { sanitizePhone, validateEmail, validatePhone, validatePassword } from "../config/validation";
 
 const AUTH_URL = `${API_URL}/auth`;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\d{7,15}$/;
-const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,128}$/;
-
 export default function CompanyRegister({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,15 +26,15 @@ export default function CompanyRegister({ navigation }) {
       Alert.alert("Empresa no válida", "Ingresa un nombre de empresa válido.");
       return;
     }
-    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+    if (!validateEmail(normalizedEmail)) {
       Alert.alert("Correo no válido", "Ingresa un correo electrónico válido.");
       return;
     }
-    if (!PHONE_PATTERN.test(normalizedPhone)) {
+    if (!validatePhone(normalizedPhone)) {
       Alert.alert("Teléfono no válido", "El teléfono debe contener solo números (7 a 15 dígitos).");
       return;
     }
-    if (!PASSWORD_PATTERN.test(password)) {
+    if (!validatePassword(password)) {
       Alert.alert("Contraseña no válida", "Debe tener 8 a 128 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
       return;
     }
@@ -67,7 +64,7 @@ export default function CompanyRegister({ navigation }) {
         <Text style={styles.subtitle}>Crea una cuenta para publicar oportunidades inclusivas.</Text>
         <TextInput style={styles.input} placeholder="Nombre de la empresa" value={name} onChangeText={setName} accessibilityLabel="Nombre de la empresa" />
         <TextInput style={styles.input} placeholder="Email corporativo" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Email corporativo" />
-        <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(value.replace(/\D/g, ""))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
+        <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
         <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
         <Text style={styles.passwordHint}>8–128 caracteres · mayúscula · minúscula · número · carácter especial</Text>
         <AccessibleButton title={loading ? "Registrando..." : "Crear cuenta de empresa"} onPress={handleRegister} disabled={loading} />
