@@ -87,8 +87,9 @@ export default function CandidateCVScreen({ route, navigation }) {
       <Text style={styles.section}>Estado</Text>
       <Text style={styles.text}>{status}</Text>
       <AccessibleButton title={loadingCv ? "Abriendo CV..." : "📄 Abrir CV"} onPress={openCandidateCv} disabled={loadingCv} />
-      <AccessibleButton title="Aceptar candidato" onPress={() => updateStatus("Aceptado")} />
-      <AccessibleButton title="Rechazar candidato" onPress={() => updateStatus("Rechazado")} />
+      <AccessibleButton title="Marcar CV visto" onPress={() => updateStatus("CV visto")} />
+      <AccessibleButton title="Pasar a proceso" onPress={() => updateStatus("En proceso")} />
+      <AccessibleButton title="Finalizar proceso" onPress={() => updateStatus("Proceso finalizado")} />
       <AccessibleButton title="Volver" type="secondary" onPress={() => navigation.goBack()} />
     </ScrollView>
   );
