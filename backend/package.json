@@ -1,7 +1,7 @@
 {
-  "name": "incluwork-backend",
+  "name": "inklu-backend",
   "version": "1.0.0",
-  "description": "Backend API for IncluWork inclusive employment platform",
+  "description": "Backend API for Inklu inclusive employment platform",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
