@@ -6,6 +6,7 @@ const Job = require("../models/Job");
 const Company = require("../models/Company");
 const calculateMatch = require("../services/matchingService");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { createNotification } = require("../services/notificationService");
 
 router.use(requireAuth, requireRole("candidate", "company"));
 
@@ -65,6 +66,17 @@ router.post("/", requireRole("candidate"), async (req, res) => {
       status: "Postulado"
     });
 
+    const company = await Company.findById(job.companyId).select("userId name");
+    if (company?.userId) {
+      await createNotification({
+        userId: company.userId,
+        type: "new_application",
+        title: "Nueva postulación",
+        message: `${candidate.name} se postuló a ${job.title}`,
+        data: { applicationId: application._id, jobId: job._id, candidateId: candidate._id }
+      });
+    }
+
     res.status(201).json({
       ...application.toObject(),
       matchScore: match.score,
@@ -89,8 +101,31 @@ router.patch("/:id/status", requireRole("company"), async (req, res) => {
       return res.status(404).json({ message: "Postulación no encontrada" });
     }
 
+    const previousStatus = application.status;
     application.status = req.body.status;
     await application.save();
+
+    if (previousStatus !== application.status) {
+      const candidate = await Candidate.findById(application.candidateId).select("userId");
+      if (candidate?.userId) {
+        const statusMessages = {
+          "CV visto": "La empresa ha visto tu CV.",
+          "En proceso": "Tu postulación pasó a la etapa En proceso.",
+          "Proceso finalizado": "El proceso de tu postulación ha finalizado."
+        };
+        const message = statusMessages[application.status];
+        if (message) {
+          await createNotification({
+            userId: candidate.userId,
+            type: "application_status",
+            title: `Postulación: ${application.status}`,
+            message,
+            data: { applicationId: application._id, jobId: application.jobId._id, status: application.status }
+          });
+        }
+      }
+    }
+
     res.json(application);
   } catch (error) {
     res.status(500).json({ message: "Error actualizando postulación", error: error.message });
