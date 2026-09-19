@@ -1,14 +1,30 @@
 const mongoose = require("mongoose");
 
+const MODALITIES = ["remoto", "híbrido", "hibrido", "presencial"];
+
 const JobSchema = new mongoose.Schema({
-  title: { type: String, required: true, trim: true },
+  title: { type: String, required: true, trim: true, minlength: 2, maxlength: 300 },
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
-  area: { type: String, default: "" },
-  modality: { type: String, default: "" },
-  experienceRequired: { type: Number, min: 0, default: 0 },
-  educationRequired: { type: String, default: "" },
-  requirements: { type: [String], default: [] },
-  accessibility: { type: [String], default: [] },
+  area: { type: String, required: true, trim: true, minlength: 2, maxlength: 300 },
+  modality: { type: String, trim: true, enum: MODALITIES },
+  experienceRequired: { type: Number, min: 0, max: 60, default: 0 },
+  educationRequired: { type: String, trim: true, maxlength: 300, default: "" },
+  requirements: {
+    type: [String],
+    default: [],
+    validate: [
+      { validator: (items) => items.length <= 30, message: "No puede haber más de 30 requisitos" },
+      { validator: (items) => items.every((item) => String(item).trim().length >= 1 && String(item).trim().length <= 100), message: "Cada requisito debe tener entre 1 y 100 caracteres" }
+    ]
+  },
+  accessibility: {
+    type: [String],
+    default: [],
+    validate: [
+      { validator: (items) => items.length <= 30, message: "No puede haber más de 30 requisitos de accesibilidad" },
+      { validator: (items) => items.every((item) => String(item).trim().length >= 1 && String(item).trim().length <= 100), message: "Cada requisito de accesibilidad debe tener entre 1 y 100 caracteres" }
+    ]
+  },
   createdAt: { type: Date, default: Date.now }
 });
 
