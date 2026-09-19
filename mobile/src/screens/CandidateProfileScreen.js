@@ -4,11 +4,11 @@ import AccessibleButton from "../components/AccessibleButton";
 import { colors } from "../theme/colors";
 import { API_URL } from "../config/api";
 import { authHeaders } from "../config/session";
-import { sanitizeName, sanitizePhone, validateName, validatePhone } from "../config/validation";
+
+const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
 
 export default function CandidateProfileScreen({ navigation }) {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [professionalTitle, setProfessionalTitle] = useState("");
   const [experience, setExperience] = useState("");
   const [skills, setSkills] = useState("");
@@ -25,9 +25,8 @@ export default function CandidateProfileScreen({ navigation }) {
       const profile = await response.json();
       if (!response.ok) return;
       setName(profile.name || "");
-      setPhone(profile.phone || "");
       setProfessionalTitle(profile.professionalTitle || "");
-      setExperience(String(profile.experience ?? ""));
+      setExperience(String(profile.experience || ""));
       setSkills((profile.skills || []).join(", "));
       setEducation(profile.education || "");
       setModality(profile.modality || "");
@@ -37,23 +36,29 @@ export default function CandidateProfileScreen({ navigation }) {
 
   const saveProfile = async () => {
     const normalizedName = name.trim();
-    const normalizedPhone = phone.trim();
-    const numericExperience = Number(experience);
+    const experienceNumber = Number(experience);
+    const normalizedModality = modality.trim().toLowerCase();
+    const skillList = skills.split(",").map((item) => item.trim()).filter(Boolean);
+    const accessibilityList = accessibility.split(",").map((item) => item.trim()).filter(Boolean);
 
-    if (!normalizedName || !normalizedPhone) {
-      Alert.alert("Datos incompletos", "Nombre y teléfono son obligatorios.");
-      return;
-    }
-    if (!validateName(normalizedName)) {
+    if (normalizedName.length < 2 || normalizedName.length > 100 || !NAME_PATTERN.test(normalizedName)) {
       Alert.alert("Nombre no válido", "El nombre solo puede contener letras, espacios, guiones y apóstrofes.");
       return;
     }
-    if (!validatePhone(normalizedPhone)) {
-      Alert.alert("Teléfono no válido", "El teléfono debe contener solo números (7 a 15 dígitos).");
+    if (!Number.isFinite(experienceNumber) || experienceNumber < 0 || experienceNumber > 60) {
+      Alert.alert("Experiencia no válida", "Ingresa un número entre 0 y 60 años.");
       return;
     }
-    if (!Number.isFinite(numericExperience) || numericExperience < 0) {
-      Alert.alert("Experiencia no válida", "La experiencia debe ser un número mayor o igual a 0.");
+    if (skillList.length > 30 || skillList.some((item) => item.length > 100)) {
+      Alert.alert("Habilidades no válidas", "Puedes registrar hasta 30 habilidades de máximo 100 caracteres.");
+      return;
+    }
+    if (accessibilityList.length > 30 || accessibilityList.some((item) => item.length > 100)) {
+      Alert.alert("Accesibilidad no válida", "Puedes registrar hasta 30 necesidades de máximo 100 caracteres.");
+      return;
+    }
+    if (normalizedModality && !["remoto", "híbrido", "hibrido", "presencial"].includes(normalizedModality)) {
+      Alert.alert("Modalidad no válida", "Usa remoto, híbrido o presencial.");
       return;
     }
 
@@ -64,38 +69,33 @@ export default function CandidateProfileScreen({ navigation }) {
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           name: normalizedName,
-          phone: normalizedPhone,
           professionalTitle: professionalTitle.trim(),
-          experience: numericExperience,
-          skills: skills.split(",").map(item => item.trim()).filter(Boolean),
+          experience: experienceNumber,
+          skills: skillList,
           education: education.trim(),
-          modality: modality.trim(),
-          accessibility: accessibility.split(",").map(item => item.trim()).filter(Boolean)
+          modality: normalizedModality,
+          accessibility: accessibilityList
         })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo guardar el perfil");
       Alert.alert("Perfil actualizado", "Tus datos se guardaron correctamente.");
-    } catch (error) {
-      Alert.alert("Error", error.message || "No se pudo guardar el perfil.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { Alert.alert("Error", error.message); }
+    finally { setLoading(false); }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Mi perfil profesional</Text>
       <Text style={styles.subtitle}>Completa tu perfil para mejorar tus recomendaciones y tu Match integral.</Text>
-      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={(value) => setName(sanitizeName(value))} autoCapitalize="words" accessibilityLabel="Nombre completo" />
-      <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" maxLength={15} accessibilityLabel="Teléfono" />
+      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Cargo o profesión" value={professionalTitle} onChangeText={setProfessionalTitle} accessibilityLabel="Cargo o profesión" />
-      <TextInput style={styles.input} placeholder="Años de experiencia" value={experience} onChangeText={(value) => setExperience(value.replace(/[^0-9.]/g, ""))} keyboardType="decimal-pad" accessibilityLabel="Años de experiencia" />
+      <TextInput style={styles.input} placeholder="Años de experiencia" value={experience} onChangeText={(value) => setExperience(value.replace(/[^0-9]/g, ""))} keyboardType="numeric" maxLength={2} accessibilityLabel="Años de experiencia" />
       <TextInput style={styles.input} placeholder="Habilidades (separadas por comas)" value={skills} onChangeText={setSkills} accessibilityLabel="Habilidades" />
       <TextInput style={styles.input} placeholder="Formación académica" value={education} onChangeText={setEducation} accessibilityLabel="Formación académica" />
       <TextInput style={styles.input} placeholder="Modalidad preferida: remoto, híbrido o presencial" value={modality} onChangeText={setModality} accessibilityLabel="Modalidad laboral preferida" />
       <TextInput style={styles.input} placeholder="Necesidades de accesibilidad (separadas por comas)" value={accessibility} onChangeText={setAccessibility} accessibilityLabel="Necesidades de accesibilidad" />
-      <AccessibleButton title="📄 Gestionar mi CV" onPress={() => navigation.navigate("CV")} disabled={loading} />
+      <AccessibleButton title="📄 Gestionar mi CV" onPress={() => navigation.navigate("CV")} />
       <AccessibleButton title={loading ? "Guardando..." : "💾 Guardar perfil"} type="secondary" onPress={saveProfile} disabled={loading} />
     </ScrollView>
   );
