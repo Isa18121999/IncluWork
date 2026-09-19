@@ -7,17 +7,19 @@ const Company = require("../models/Company");
 const calculateMatch = require("../services/matchingService");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
-router.use(requireAuth);
+router.use(requireAuth, requireRole("candidate", "company"));
 
 router.get("/", async (req, res) => {
   try {
     const filter = {};
     if (req.user.role === "candidate") {
-      const candidate = await Candidate.findOne({ userId: req.user.id });
-      filter.candidateId = candidate?._id;
-    } else if (req.user.role === "company") {
-      const company = await Company.findOne({ userId: req.user.id });
-      const jobs = await Job.find({ companyId: company?._id }).select("_id");
+      const candidate = await Candidate.findOne({ userId: req.user.id }).select("_id");
+      if (!candidate) return res.status(404).json({ message: "Perfil de candidato no encontrado" });
+      filter.candidateId = candidate._id;
+    } else {
+      const company = await Company.findOne({ userId: req.user.id }).select("_id");
+      if (!company) return res.status(404).json({ message: "Perfil de empresa no encontrado" });
+      const jobs = await Job.find({ companyId: company._id }).select("_id");
       filter.jobId = { $in: jobs.map((job) => job._id) };
     }
 
