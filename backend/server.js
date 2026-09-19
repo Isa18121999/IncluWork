@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (_req, res) => {
-  res.json({ message: "IncluWork API funcionando" });
+  res.json({ message: "Inklu API funcionando" });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`IncluWork API running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Inklu API running on port ${PORT}`));
