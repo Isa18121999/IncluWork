@@ -6,7 +6,7 @@ const ApplicationSchema = new mongoose.Schema({
   matchScore: { type: Number, min: 0, max: 100, default: 0 },
   status: {
     type: String,
-    enum: ["Postulado", "CV visto", "Aceptado", "Rechazado"],
+    enum: ["Postulado", "CV visto", "En proceso", "Proceso finalizado"],
     default: "Postulado"
   },
   createdAt: { type: Date, default: Date.now },
