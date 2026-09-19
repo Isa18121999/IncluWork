@@ -105,12 +105,24 @@ function extractDocxText(buffer) {
   throw new Error("No se pudo leer el documento DOCX");
 }
 
+function extractDocText(filePath) {
+  try {
+    return execFileSync("antiword", [filePath], {
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024
+    }).trim();
+  } catch (error) {
+    return "";
+  }
+}
+
 function extractText(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const buffer = fs.readFileSync(filePath);
 
   if (extension === ".pdf") return extractPdfText(buffer, filePath);
   if (extension === ".docx") return extractDocxText(buffer);
+  if (extension === ".doc") return extractDocText(filePath);
   return "";
 }
 
