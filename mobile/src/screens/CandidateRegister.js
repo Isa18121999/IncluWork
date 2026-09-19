@@ -17,10 +17,15 @@ const COUNTRIES = [
   { label: "🇺🇸 Estados Unidos", value: "US", document: "Acreditación oficial aplicable" },
   { label: "🌎 Otro país", value: "OTHER", document: "Certificación oficial equivalente" }
 ];
+const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^\d{7,15}$/;
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,128}$/;
 
 export default function CandidateRegister({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("PE");
   const [documentNumber, setDocumentNumber] = useState("");
@@ -28,8 +33,27 @@ export default function CandidateRegister({ navigation }) {
   const countryData = useMemo(() => COUNTRIES.find((item) => item.value === country) || COUNTRIES[0], [country]);
 
   const submitRegistration = async () => {
-    if (!name.trim() || !email.trim() || !password || !documentNumber.trim()) {
-      Alert.alert("Datos incompletos", "Completa nombre, correo, contraseña y número de acreditación.");
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.trim();
+    if (!normalizedName || !normalizedEmail || !normalizedPhone || !password || !documentNumber.trim()) {
+      Alert.alert("Datos incompletos", "Completa todos los campos obligatorios.");
+      return;
+    }
+    if (!NAME_PATTERN.test(normalizedName)) {
+      Alert.alert("Nombre no válido", "El nombre solo puede contener letras, espacios, guiones y apóstrofes.");
+      return;
+    }
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      Alert.alert("Correo no válido", "Ingresa un correo electrónico válido.");
+      return;
+    }
+    if (!PHONE_PATTERN.test(normalizedPhone)) {
+      Alert.alert("Teléfono no válido", "El teléfono debe contener solo números (7 a 15 dígitos).");
+      return;
+    }
+    if (!PASSWORD_PATTERN.test(password)) {
+      Alert.alert("Contraseña no válida", "Debe tener 8 a 128 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
       return;
     }
     setLoading(true);
@@ -37,15 +61,7 @@ export default function CandidateRegister({ navigation }) {
       const response = await fetch(`${AUTH_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          password,
-          role: "candidate",
-          country,
-          accreditationType: countryData.document,
-          accreditationNumber: documentNumber.trim()
-        })
+        body: JSON.stringify({ name: normalizedName, email: normalizedEmail, phone: normalizedPhone, password, role: "candidate", country, accreditationType: countryData.document, accreditationNumber: documentNumber.trim() })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "No se pudo completar el registro");
@@ -55,18 +71,18 @@ export default function CandidateRegister({ navigation }) {
       ]);
     } catch (error) {
       Alert.alert("Error de registro", error.message || "No se pudo conectar con el servidor.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Registro de candidato</Text>
-      <Text style={styles.subtitle}>Crea tu cuenta y completa los datos de acreditación para utilizar IncluWork.</Text>
-      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} accessibilityLabel="Nombre completo" />
+      <Text style={styles.subtitle}>Crea tu cuenta y completa los datos de acreditación para utilizar Inklu.</Text>
+      <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Correo electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Correo electrónico" />
+      <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(value.replace(/\D/g, ""))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
       <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
+      <Text style={styles.passwordHint}>8–128 caracteres · mayúscula · minúscula · número · carácter especial</Text>
       <Text style={styles.label}>País de registro</Text>
       <Picker selectedValue={country} onValueChange={setCountry}>{COUNTRIES.map((item) => <Picker.Item key={item.value} label={item.label} value={item.value} />)}</Picker>
       <Text style={styles.label}>Tipo de acreditación</Text>
@@ -84,6 +100,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, lineHeight: 23, color: colors.text, marginBottom: 18 },
   label: { marginTop: 12, marginBottom: 6, fontWeight: "700", color: colors.text },
   input: { borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 14, marginBottom: 12, fontSize: 16 },
+  passwordHint: { marginTop: -6, marginBottom: 8, color: colors.text, fontSize: 13 },
   readonlyBox: { borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 14, backgroundColor: "#F8FAFC", marginBottom: 12 },
   readonlyText: { fontSize: 16, color: colors.text }
 });
