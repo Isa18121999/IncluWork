@@ -104,6 +104,7 @@ export default function CompanyDashboardScreen({ navigation }) {
       <Text style={styles.subtitle}>Gestiona ofertas y encuentra talento inclusivo.</Text>
 
       <AccessibleButton title="📌 Publicar oferta" onPress={() => navigation.navigate("CreateJob")} />
+      <AccessibleButton title={`🔔 Notificaciones${unreadCount ? ` (${unreadCount})` : ""}`} type="secondary" onPress={() => navigation.navigate("Notifications")} />
 
       <Text style={styles.section}>💼 Mis ofertas</Text>
       {loadingJobs && <ActivityIndicator color={colors.primary} />}
