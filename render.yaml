@@ -1,13 +1,13 @@
 services:
   - type: web
-    name: incluwork-backend
+    name: inklu-backend
     runtime: docker
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: ./
     healthCheckPath: /health
     disk:
-      name: incluwork-cv-storage
+      name: inklu-cv-storage
       mountPath: /app/uploads
       sizeGB: 1
     envVars:
