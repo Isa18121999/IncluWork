@@ -13,7 +13,7 @@ const CRITERIA_LABELS = {
   accessibility: "Accesibilidad"
 };
 
-const STATUS_OPTIONS = ["CV visto", "Aceptado", "Rechazado"];
+const STATUS_OPTIONS = ["CV visto", "En proceso", "Proceso finalizado"];
 
 export default function CompanyDashboardScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
@@ -89,7 +89,7 @@ export default function CompanyDashboardScreen({ navigation }) {
   };
 
   const confirmStatus = (candidate, status) => {
-    const action = status === "CV visto" ? "marcar esta postulación como CV visto" : status === "Aceptado" ? "aceptar esta postulación" : "rechazar esta postulación";
+    const action = status === "CV visto" ? "marcar esta postulación como CV visto" : status === "En proceso" ? "pasar esta postulación a En proceso" : "finalizar el proceso de esta postulación";
     Alert.alert("Cambiar estado", `¿Quieres ${action}?`, [
       { text: "Cancelar", style: "cancel" },
       { text: "Confirmar", onPress: () => updateStatus(candidate, status) }
@@ -147,12 +147,12 @@ export default function CompanyDashboardScreen({ navigation }) {
           <Text style={styles.status}>Estado: {candidate.status}</Text>
           <AccessibleButton title="Revisar perfil" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
 
-          {candidate.applicationId && candidate.status !== "Rechazado" && (
+          {candidate.applicationId && candidate.status !== "Proceso finalizado" && (
             <View style={styles.actions}>
               {STATUS_OPTIONS.filter((status) => status !== candidate.status).map((status) => (
                 <AccessibleButton
                   key={status}
-                  title={status === "CV visto" ? "👁 Marcar CV visto" : status === "Aceptado" ? "✅ Aceptar" : "❌ Rechazar"}
+                  title={status === "CV visto" ? "👁 Marcar CV visto" : status === "En proceso" ? "⏳ Pasar a proceso" : "✓ Finalizar proceso"}
                   type="secondary"
                   onPress={() => confirmStatus(candidate, status)}
                 />
