@@ -14,12 +14,20 @@ const profileRoutes = require("./routes/profileRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
 const uploadsDirectory = path.join(__dirname, "..", "uploads");
 fs.mkdirSync(path.join(uploadsDirectory, "cv"), { recursive: true });
 
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((origin) => origin.trim()).filter(Boolean);
 app.use(cors({ origin: allowedOrigins?.length ? allowedOrigins : true }));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
