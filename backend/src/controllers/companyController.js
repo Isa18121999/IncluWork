@@ -11,10 +11,14 @@ const getRecommendedCandidates = async (req, res) => {
     if (!job) {
       return res.status(404).json({ message: "Oferta no encontrada" });
     }
-    const company = await Company.findOne({ userId: req.user.id });
-    if (!company || job.companyId.toString() !== company._id.toString()) return res.status(403).json({ message: "No puedes ver candidatos de esta oferta" });
 
-    const candidates = await Candidate.find();
+    const company = await Company.findOne({ userId: req.user.id });
+    if (!company || job.companyId.toString() !== company._id.toString()) {
+      return res.status(403).json({ message: "No puedes ver candidatos de esta oferta" });
+    }
+
+    const candidates = await Candidate.find()
+      .select("name professionalTitle experience skills education modality accessibility");
     const applications = await Application.find({ jobId: job._id });
 
     const recommendations = candidates.map((candidate) => {
