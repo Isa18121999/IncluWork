@@ -99,7 +99,7 @@ export default function CandidateProfileScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Mi perfil profesional</Text>
+      <Text style={styles.title} accessibilityRole="header">Mi perfil profesional</Text>
       <Text style={styles.subtitle}>Completa tu perfil para mejorar tus recomendaciones y tu Match integral.</Text>
       <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={(value) => setName(sanitizeName(value))} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" maxLength={15} accessibilityLabel="Teléfono" />
@@ -109,8 +109,8 @@ export default function CandidateProfileScreen({ navigation }) {
       <TextInput style={styles.input} placeholder="Formación académica" value={education} onChangeText={setEducation} accessibilityLabel="Formación académica" />
       <TextInput style={styles.input} placeholder="Modalidad preferida: remoto, híbrido o presencial" value={modality} onChangeText={setModality} accessibilityLabel="Modalidad laboral preferida" />
       <TextInput style={styles.input} placeholder="Necesidades de accesibilidad (separadas por comas)" value={accessibility} onChangeText={setAccessibility} accessibilityLabel="Necesidades de accesibilidad" />
-      <AccessibleButton title="📄 Gestionar mi CV" onPress={() => navigation.navigate("CV")} disabled={loading} />
-      <AccessibleButton title={loading ? "Guardando..." : "💾 Guardar perfil"} type="secondary" onPress={saveProfile} disabled={loading} />
+      <AccessibleButton title="📄 Gestionar mi CV" accessibilityHint="Abre la pantalla para subir o actualizar tu CV." onPress={() => navigation.navigate("CV")} disabled={loading} />
+      <AccessibleButton title={loading ? "Guardando..." : "💾 Guardar perfil"} accessibilityHint="Guarda los cambios del perfil." type="secondary" onPress={saveProfile} disabled={loading} />
     </ScrollView>
   );
 }
