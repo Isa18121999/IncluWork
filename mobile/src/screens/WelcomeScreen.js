@@ -7,13 +7,13 @@ export default function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.logo} accessibilityLabel="Logo Inklu">Inklu</Text>
-      <Text style={styles.title}>¡Bienvenidos a Inklu!</Text>
+      <Text style={styles.title} accessibilityRole="header">¡Bienvenidos a Inklu!</Text>
       <Text style={styles.description}>
         Conectamos talento con oportunidades laborales inclusivas mediante tecnología accesible e inteligencia artificial.
       </Text>
-      <AccessibleButton title="👤 Soy candidato" onPress={() => navigation.navigate("CandidateRegister")} />
-      <AccessibleButton title="🏢 Soy empresa" type="secondary" onPress={() => navigation.navigate("CompanyRegister")} />
-      <AccessibleButton title="🔐 Iniciar sesión" onPress={() => navigation.navigate("Login")} />
+      <AccessibleButton title="Soy candidato" accessibilityHint="Abre el registro de candidato." onPress={() => navigation.navigate("CandidateRegister")} />
+      <AccessibleButton title="Soy empresa" accessibilityHint="Abre el registro de empresa." type="secondary" onPress={() => navigation.navigate("CompanyRegister")} />
+      <AccessibleButton title="Iniciar sesión" accessibilityHint="Abre el inicio de sesión." onPress={() => navigation.navigate("Login")} />
     </View>
   );
 }
