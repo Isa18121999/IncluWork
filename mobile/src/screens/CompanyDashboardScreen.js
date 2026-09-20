@@ -119,7 +119,7 @@ export default function CompanyDashboardScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>🏢 Panel Empresa</Text>
+      <Text style={styles.title} accessibilityRole="header">Panel Empresa</Text>
       <Text style={styles.subtitle}>Gestiona ofertas y encuentra talento inclusivo.</Text>
 
       <AccessibleButton title="📌 Publicar oferta" onPress={() => navigation.navigate("CreateJob")} />
@@ -135,7 +135,7 @@ export default function CompanyDashboardScreen({ navigation }) {
           {!!job.area && <Text>{job.area}</Text>}
           {!!job.modality && <Text>Modalidad: {job.modality}</Text>}
           <AccessibleButton
-            title={job._id === selectedJobId ? "✓ Oferta seleccionada" : "Ver candidatos"}
+            title={job._id === selectedJobId ? "✓ Oferta seleccionada" : "Ver candidatos"} accessibilityLabel={job._id === selectedJobId ? `Oferta seleccionada: ${job.title}` : `Ver candidatos de la oferta: ${job.title}`}
             type={job._id === selectedJobId ? "secondary" : "primary"}
             onPress={() => setSelectedJobId(job._id)}
           />
