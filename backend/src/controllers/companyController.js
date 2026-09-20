@@ -46,7 +46,8 @@ const getRecommendedCandidates = async (req, res) => {
       candidates: recommendations
     });
   } catch (error) {
-    res.status(500).json({ message: "Error obteniendo candidatos", error: error.message });
+    console.error("Candidate recommendations error", error.message);
+    res.status(500).json({ message: "Error obteniendo candidatos" });
   }
 };
 
