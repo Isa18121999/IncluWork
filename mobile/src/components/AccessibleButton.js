@@ -2,6 +2,11 @@ import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../theme/colors";
 
+const getAccessibleLabel = (title, accessibilityLabel) => {
+  if (accessibilityLabel) return accessibilityLabel;
+  return String(title).replace(/[\\p{Extended_Pictographic}\\uFE0F]/gu, "").replace(/\\s+/g, " ").trim();
+};
+
 export default function AccessibleButton({ title, onPress, type = "primary", disabled = false, accessibilityLabel, accessibilityHint }) {
   return (
     <TouchableOpacity
@@ -10,7 +15,7 @@ export default function AccessibleButton({ title, onPress, type = "primary", dis
       disabled={disabled}
       activeOpacity={disabled ? 1 : 0.7}
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel || title}
+      accessibilityLabel={getAccessibleLabel(title, accessibilityLabel)}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       accessible
