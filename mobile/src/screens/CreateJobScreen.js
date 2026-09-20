@@ -68,15 +68,15 @@ export default function CreateJobScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>📌 Publicar oferta laboral</Text>
-      <TextInput style={styles.input} placeholder="Cargo" value={title} onChangeText={setTitle} maxLength={300} />
-      <TextInput style={styles.input} placeholder="Área profesional" value={area} onChangeText={setArea} maxLength={300} />
-      <TextInput style={styles.input} placeholder="Modalidad: remoto, híbrido o presencial" value={modality} onChangeText={setModality} maxLength={20} />
-      <TextInput style={styles.input} placeholder="Experiencia mínima en años" value={experienceRequired} onChangeText={(value) => setExperienceRequired(value.replace(/[^0-9]/g, ""))} keyboardType="numeric" maxLength={2} />
-      <TextInput style={styles.input} placeholder="Formación académica requerida" value={educationRequired} onChangeText={setEducationRequired} maxLength={300} />
-      <TextInput style={styles.input} placeholder="Requisitos / habilidades separados por coma" value={requirements} onChangeText={setRequirements} maxLength={3000} multiline />
-      <TextInput style={styles.input} placeholder="Accesibilidad requerida, separada por coma" value={accessibility} onChangeText={setAccessibility} maxLength={3000} multiline />
-      <AccessibleButton title="Publicar oferta" onPress={publishJob} />
+      <Text style={styles.title} accessibilityRole="header">Publicar oferta laboral</Text>
+      <TextInput style={styles.input} placeholder="Cargo" accessibilityLabel="Cargo de la oferta" accessibilityHint="Escribe el nombre del puesto." value={title} onChangeText={setTitle} maxLength={300} />
+      <TextInput style={styles.input} placeholder="Área profesional" accessibilityLabel="Área profesional" accessibilityHint="Escribe el área profesional." value={area} onChangeText={setArea} maxLength={300} />
+      <TextInput style={styles.input} placeholder="Modalidad: remoto, híbrido o presencial" accessibilityLabel="Modalidad laboral" accessibilityHint="Escribe remoto, híbrido o presencial." value={modality} onChangeText={setModality} maxLength={20} />
+      <TextInput style={styles.input} placeholder="Experiencia mínima en años" accessibilityLabel="Experiencia mínima en años" accessibilityHint="Escribe la cantidad de años." value={experienceRequired} onChangeText={(value) => setExperienceRequired(value.replace(/[^0-9]/g, ""))} keyboardType="numeric" maxLength={2} />
+      <TextInput style={styles.input} placeholder="Formación académica requerida" accessibilityLabel="Formación académica requerida" accessibilityHint="Escribe la formación solicitada." value={educationRequired} onChangeText={setEducationRequired} maxLength={300} />
+      <TextInput style={styles.input} placeholder="Requisitos / habilidades separados por coma" accessibilityLabel="Requisitos y habilidades" accessibilityHint="Escribe requisitos separados por comas." value={requirements} onChangeText={setRequirements} maxLength={3000} multiline />
+      <TextInput style={styles.input} placeholder="Accesibilidad requerida, separada por coma" accessibilityLabel="Requisitos de accesibilidad" accessibilityHint="Escribe ajustes de accesibilidad separados por comas." value={accessibility} onChangeText={setAccessibility} maxLength={3000} multiline />
+      <AccessibleButton title="Publicar oferta" accessibilityHint="Publica esta oferta laboral." onPress={publishJob} />
     </ScrollView>
   );
 }
