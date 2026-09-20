@@ -40,7 +40,7 @@ export default function CandidateDashboard({ navigation }) {
   const handleLogout = async () => { await clearSessionToken(); navigation.replace("Welcome"); };
   const confirmLogout = () => Alert.alert("Cerrar sesión", "¿Quieres cerrar tu sesión?", [{ text: "Cancelar", style: "cancel" }, { text: "Cerrar sesión", style: "destructive", onPress: handleLogout }]);
   return <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Hola 👋</Text><Text style={styles.status}>Perfil verificado 🟢</Text>
+    <Text style={styles.title}>Hola 👋</Text><Text style={styles.status}>Acreditación registrada 🟢</Text>
     <View style={styles.matchCard}><Text style={styles.matchTitle}>Tus mejores coincidencias</Text>
       {loading ? <ActivityIndicator color={colors.primary} /> : matches.length ? matches.map((job) => <View key={job._id} style={styles.matchRow}><View style={styles.matchInfo}><Text style={styles.jobTitle}>{job.title}</Text><Text>{job.companyId?.name || "Empresa"}</Text><Text style={styles.breakdownTitle}>Match integral</Text>{Object.entries(job.breakdown || {}).map(([key, value]) => <Text key={key} style={styles.breakdown}>• {criteriaLabels[key] || key}: {value}%</Text>)}{job.missingSkills?.length > 0 && <Text style={styles.warning}>⚠️ Faltan: {job.missingSkills.join(" · ")}</Text>}</View><Text style={styles.match}>{job.score}%</Text></View>) : <Text style={styles.caption}>Completa tus habilidades para encontrar coincidencias.</Text>}
     </View>
