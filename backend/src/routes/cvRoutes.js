@@ -118,7 +118,8 @@ router.post("/me", requireAuth, requireRole("candidate"), upload.single("cv"), a
     });
   } catch (error) {
     if (req.file?.path) fs.unlink(req.file.path, () => {});
-    res.status(500).json({ message: error.message });
+    console.error("CV upload error", error.message);
+    res.status(500).json({ message: "Error procesando el CV" });
   }
 });
 
