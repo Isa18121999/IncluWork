@@ -26,7 +26,7 @@ const uploadsDirectory = path.join(__dirname, "..", "uploads");
 fs.mkdirSync(path.join(uploadsDirectory, "cv"), { recursive: true });
 
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((origin) => origin.trim()).filter(Boolean);
-app.use(cors({ origin: allowedOrigins?.length ? allowedOrigins : true }));
+app.use(cors({ origin: allowedOrigins?.length ? allowedOrigins : false }));
 app.use(express.json({ limit: "1mb" }));
 
 app.use("/api/applications", applicationRoutes);
