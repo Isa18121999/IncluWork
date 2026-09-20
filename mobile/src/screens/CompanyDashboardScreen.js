@@ -14,7 +14,12 @@ const CRITERIA_LABELS = {
   accessibility: "Accesibilidad"
 };
 
-const STATUS_OPTIONS = ["CV visto", "En proceso", "Proceso finalizado"];
+const NEXT_STATUS = {
+  Postulado: "CV visto",
+  "CV visto": "En proceso",
+  "En proceso": "Proceso finalizado",
+  "Proceso finalizado": null
+};
 
 export default function CompanyDashboardScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
@@ -162,16 +167,17 @@ export default function CompanyDashboardScreen({ navigation }) {
           <Text style={styles.status}>Estado: {candidate.status}</Text>
           <AccessibleButton title="Revisar perfil" onPress={() => navigation.navigate("CandidateCV", { candidate })} />
 
-          {candidate.applicationId && candidate.status !== "Proceso finalizado" && (
+          {candidate.applicationId && NEXT_STATUS[candidate.status] && (
             <View style={styles.actions}>
-              {STATUS_OPTIONS.filter((status) => status !== candidate.status).map((status) => (
-                <AccessibleButton
-                  key={status}
-                  title={status === "CV visto" ? "👁 Marcar CV visto" : status === "En proceso" ? "⏳ Pasar a proceso" : "✓ Finalizar proceso"}
-                  type="secondary"
-                  onPress={() => confirmStatus(candidate, status)}
-                />
-              ))}
+              <AccessibleButton
+                title={NEXT_STATUS[candidate.status] === "CV visto"
+                  ? "👁 Marcar CV visto"
+                  : NEXT_STATUS[candidate.status] === "En proceso"
+                    ? "⏳ Pasar a proceso"
+                    : "✓ Finalizar proceso"}
+                type="secondary"
+                onPress={() => confirmStatus(candidate, NEXT_STATUS[candidate.status])}
+              />
             </View>
           )}
         </View>
