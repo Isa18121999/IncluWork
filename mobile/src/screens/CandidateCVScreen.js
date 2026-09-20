@@ -77,7 +77,7 @@ export default function CandidateCVScreen({ route, navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>👤 Revisión de candidato</Text>
+      <Text style={styles.title} accessibilityRole="header">Revisión de candidato</Text>
       <Text style={styles.name}>{candidate?.name || "Candidato"}</Text>
       <Text style={styles.match}>🤖 {candidate?.score || candidate?.match || 0}% Match IA</Text>
       <Text style={styles.section}>Perfil profesional</Text>
@@ -86,10 +86,10 @@ export default function CandidateCVScreen({ route, navigation }) {
       <Text style={styles.text}>{candidate?.skills?.join(" · ") || "Habilidades no disponibles"}</Text>
       <Text style={styles.section}>Estado</Text>
       <Text style={styles.text}>{status}</Text>
-      <AccessibleButton title={loadingCv ? "Abriendo CV..." : "📄 Abrir CV"} onPress={openCandidateCv} disabled={loadingCv} />
-      <AccessibleButton title="Marcar CV visto" onPress={() => updateStatus("CV visto")} />
-      <AccessibleButton title="Pasar a proceso" onPress={() => updateStatus("En proceso")} />
-      <AccessibleButton title="Finalizar proceso" onPress={() => updateStatus("Proceso finalizado")} />
+      <AccessibleButton title={loadingCv ? "Abriendo CV..." : "Abrir CV"} accessibilityHint="Abre el CV del candidato." onPress={openCandidateCv} disabled={loadingCv} />
+      <AccessibleButton title="Marcar CV visto" accessibilityHint="Cambia el estado de la postulación a CV visto." onPress={() => updateStatus("CV visto")} />
+      <AccessibleButton title="Pasar a proceso" accessibilityHint="Cambia el estado de la postulación a En proceso." onPress={() => updateStatus("En proceso")} />
+      <AccessibleButton title="Finalizar proceso" accessibilityHint="Cambia el estado de la postulación a Proceso finalizado." onPress={() => updateStatus("Proceso finalizado")} />
       <AccessibleButton title="Volver" type="secondary" onPress={() => navigation.goBack()} />
     </ScrollView>
   );
