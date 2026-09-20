@@ -35,11 +35,11 @@ export default function ApplicationsScreen({ navigation }) {
       contentContainerStyle={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadApplications(true)} />}
     >
-      <Text style={styles.title}>Mis postulaciones</Text>
+      <Text style={styles.title} accessibilityRole="header">Mis postulaciones</Text>
       {loading && <ActivityIndicator color={colors.primary} />}
 
       {applications.map((application) => (
-        <View key={application._id} style={styles.card}>
+        <View key={application._id} style={styles.card} accessible accessibilityLabel={`${application.jobId?.title || "Oferta"}, ${application.jobId?.companyId?.name || "Empresa"}, Match integral ${Number(application.matchScore ?? 0)}%, estado ${application.status || "Postulado"}`}>
           <Text style={styles.job}>{application.jobId?.title || "Oferta"}</Text>
           <Text style={styles.company}>{application.jobId?.companyId?.name || "Empresa"}</Text>
           <View style={styles.row}>
