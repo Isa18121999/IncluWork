@@ -72,15 +72,15 @@ export default function CandidateRegister({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Registro de candidato</Text>
+      <Text style={styles.title} accessibilityRole="header">Registro de candidato</Text>
       <Text style={styles.subtitle}>Crea tu cuenta y completa los datos de acreditación para utilizar Inklu.</Text>
       <TextInput style={styles.input} placeholder="Nombre completo" value={name} onChangeText={(value) => setName(sanitizeName(value))} autoCapitalize="words" accessibilityLabel="Nombre completo" />
       <TextInput style={styles.input} placeholder="Correo electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Correo electrónico" />
       <TextInput style={styles.input} placeholder="Teléfono (7 a 15 dígitos)" value={phone} onChangeText={(value) => setPhone(sanitizePhone(value))} keyboardType="phone-pad" accessibilityLabel="Teléfono" maxLength={15} />
       <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" />
       <Text style={styles.passwordHint}>8–128 caracteres · mayúscula · minúscula · número · carácter especial</Text>
-      <Text style={styles.label}>País de registro</Text>
-      <Picker selectedValue={country} onValueChange={setCountry}>{COUNTRIES.map((item) => <Picker.Item key={item.value} label={item.label} value={item.value} />)}</Picker>
+      <Text style={styles.label} accessibilityRole="text">País de registro</Text>
+      <Picker accessibilityLabel="País de registro" selectedValue={country} onValueChange={setCountry}>{COUNTRIES.map((item) => <Picker.Item key={item.value} label={item.label} value={item.value} />)}</Picker>
       <Text style={styles.label}>Tipo de acreditación</Text>
       <View style={styles.readonlyBox}><Text style={styles.readonlyText}>{countryData.document}</Text></View>
       <TextInput style={styles.input} placeholder="Número de carnet o certificado" value={documentNumber} onChangeText={setDocumentNumber} accessibilityLabel="Número de carnet o certificado" />
