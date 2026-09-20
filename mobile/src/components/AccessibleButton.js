@@ -4,7 +4,7 @@ import { colors } from "../theme/colors";
 
 const getAccessibleLabel = (title, accessibilityLabel) => {
   if (accessibilityLabel) return accessibilityLabel;
-  return String(title).replace(/[\\p{Extended_Pictographic}\\uFE0F]/gu, "").replace(/\\s+/g, " ").trim();
+  return String(title).replace(/[\p{Extended_Pictographic}\uFE0F]/gu, "").replace(/\s+/g, " ").trim();
 };
 
 export default function AccessibleButton({ title, onPress, type = "primary", disabled = false, accessibilityLabel, accessibilityHint }) {
