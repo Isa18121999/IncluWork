@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Alert, ActivityIndicator, ScrollView, Text, View, StyleSheet } from "react-native";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
@@ -70,10 +71,10 @@ export default function CompanyDashboardScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     loadJobs();
     loadUnreadCount();
-  }, [loadJobs, loadUnreadCount]);
+  }, [loadJobs, loadUnreadCount]));
 
   useEffect(() => {
     loadCandidates(selectedJobId);
