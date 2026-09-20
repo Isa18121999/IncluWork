@@ -40,7 +40,7 @@ export default function LoginScreen({ navigation }) {
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
-        <Text style={styles.title}>Iniciar sesión</Text>
+        <Text style={styles.title} accessibilityRole="header">Iniciar sesión</Text>
         <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} accessibilityLabel="Correo electrónico" accessibilityHint="Ingresa tu correo electrónico" textContentType="emailAddress" />
         <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry accessibilityLabel="Contraseña" accessibilityHint="Ingresa tu contraseña" textContentType="password" />
         <AccessibleButton title={loading ? "Ingresando..." : "Iniciar sesión"} onPress={handleLogin} disabled={loading} accessibilityHint="Activa para acceder a tu cuenta" />
