@@ -37,7 +37,8 @@ const createJob = async (req, res) => {
     });
     res.status(201).json(job);
   } catch (error) {
-    res.status(500).json({ message: "Error creando oferta", error: error.message });
+    console.error("Job create error", error.message);
+    res.status(500).json({ message: "Error creando oferta" });
   }
 };
 
@@ -46,7 +47,8 @@ const getJobs = async (req, res) => {
     const jobs = await Job.find().populate("companyId", "name").sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: "Error obteniendo ofertas", error: error.message });
+    console.error("Job list error", error.message);
+    res.status(500).json({ message: "Error obteniendo ofertas" });
   }
 };
 
@@ -56,7 +58,8 @@ const getMyJobs = async (req, res) => {
     const jobs = await Job.find({ companyId: company?._id }).sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: "Error obteniendo ofertas", error: error.message });
+    console.error("Company job list error", error.message);
+    res.status(500).json({ message: "Error obteniendo ofertas" });
   }
 };
 
