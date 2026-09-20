@@ -66,11 +66,11 @@ export default function NotificationsScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Notificaciones</Text>
+          <Text style={styles.title} accessibilityRole="header">Notificaciones</Text>
           <Text style={styles.subtitle}>{unreadCount} sin leer</Text>
         </View>
         <AccessibleButton
-          title="Leer todas"
+          title="Leer todas" accessibilityHint="Marca todas las notificaciones como leídas."
           type="secondary"
           onPress={markAllAsRead}
           disabled={!unreadCount}
@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
       )}
 
       {notifications.map((notification) => (
-        <View key={notification._id} style={[styles.card, !notification.read && styles.unread]}>
+        <View key={notification._id} style={[styles.card, !notification.read && styles.unread]} accessible accessibilityLabel={`${notification.title}. ${notification.message}. ${notification.read ? "Leída" : "No leída"}`}>
           <View style={styles.row}>
             <Text style={styles.notificationTitle}>{notification.title}</Text>
             {!notification.read && <View style={styles.dot} />}
