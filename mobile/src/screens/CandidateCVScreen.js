@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Alert, ScrollView, Text, StyleSheet } from "react-native";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import AccessibleButton from "../components/AccessibleButton";
 import { API_URL } from "../config/api";
