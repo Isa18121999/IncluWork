@@ -89,12 +89,12 @@ export default function CVUpload({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📄 Mi CV</Text>
+      <Text style={styles.title} accessibilityRole="header">Mi CV</Text>
       <Text style={styles.description}>
         Sube o actualiza tu CV para mejorar tu perfil y Match IA.
       </Text>
 
-      {cvName ? <Text style={styles.file}>{cvName}</Text> : <Text style={styles.empty}>No tienes un CV cargado.</Text>}
+      {cvName ? <Text style={styles.file} accessibilityLabel={`Archivo de CV seleccionado: ${cvName}`}>{cvName}</Text> : <Text style={styles.empty}>No tienes un CV cargado.</Text>}
       {extractedFields.length > 0 ? (
         <Text style={styles.extracted}>
           ✓ Perfil actualizado con: {extractedFields.map((field) => ({
@@ -107,8 +107,8 @@ export default function CVUpload({ navigation, route }) {
         </Text>
       ) : null}
 
-      <AccessibleButton title={loading ? "Subiendo..." : "📤 Subir CV"} onPress={chooseCV} disabled={loading} />
-      <AccessibleButton title="🔄 Actualizar CV" type="secondary" onPress={chooseCV} disabled={loading} />
+      <AccessibleButton title={loading ? "Subiendo..." : "📤 Subir CV"} accessibilityHint="Abre el selector para elegir un archivo PDF, DOC o DOCX." onPress={chooseCV} disabled={loading} />
+      <AccessibleButton title="🔄 Actualizar CV" accessibilityHint="Selecciona un nuevo archivo para reemplazar tu CV." type="secondary" onPress={chooseCV} disabled={loading} />
       <AccessibleButton title="Volver a mi perfil" onPress={() => navigation.goBack()} />
     </View>
   );
