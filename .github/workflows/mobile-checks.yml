@@ -34,3 +34,6 @@ jobs:
 
       - name: Expo config check
         run: npx expo config --type public
+
+      - name: Expo web export check
+        run: npx expo export --platform web --output-dir /tmp/inklu-dist
