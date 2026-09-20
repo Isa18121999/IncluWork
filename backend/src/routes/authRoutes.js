@@ -61,7 +61,8 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({ message: "Registro correcto", user: publicUser(user), token: issueToken(user), profileId: profile._id });
   } catch (error) {
-    console.error("Registration error", error.message);\n    res.status(500).json({ message: "Error registrando usuario" });
+    console.error("Registration error", error.message);
+    res.status(500).json({ message: "Error registrando usuario" });
   }
 });
 
@@ -74,7 +75,8 @@ router.post("/login", async (req, res) => {
     if (!user || !user.active || !verifyPassword(password, user.password)) return res.status(401).json({ message: "Email o contraseña incorrectos" });
     res.json({ message: "Login correcto", user: publicUser(user), token: issueToken(user) });
   } catch (error) {
-    console.error("Login error", error.message);\n    res.status(500).json({ message: "Error iniciando sesión" });
+    console.error("Login error", error.message);
+    res.status(500).json({ message: "Error iniciando sesión" });
   }
 });
 
