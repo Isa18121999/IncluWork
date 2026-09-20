@@ -108,6 +108,19 @@ router.patch("/:id/status", requireRole("company"), async (req, res) => {
     }
 
     const previousStatus = application.status;
+    const nextStatuses = {
+      "Postulado": "CV visto",
+      "CV visto": "En proceso",
+      "En proceso": "Proceso finalizado",
+      "Proceso finalizado": null
+    };
+
+    if (previousStatus !== req.body.status && nextStatuses[previousStatus] !== req.body.status) {
+      return res.status(400).json({
+        message: `No se puede pasar de "${previousStatus}" a "${req.body.status}".`
+      });
+    }
+
     application.status = req.body.status;
     await application.save();
 
