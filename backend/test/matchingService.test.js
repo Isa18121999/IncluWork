@@ -12,7 +12,7 @@ test("calcula compatibilidad de habilidades sin distinguir mayúsculas", () => {
   assert.deepEqual(result.matchedSkills, ["javascript"]);
 });
 
-test("integra experiencia, educación y modalidad", () => {
+test("normaliza acentos en educación y modalidad", () => {\n  const result = calculateMatch(\n    { name: "Ana", skills: ["JavaScript"], education: "Técnica en Sistemas", modality: "híbrido" },\n    { requirements: ["javascript"], educationRequired: "tecnico", modality: "hybrid" }\n  );\n  assert.equal(result.breakdown.education, 100);\n  assert.equal(result.breakdown.modality, 100);\n});\n\ntest("integra experiencia, educación y modalidad", () => {
   const result = calculateMatch(
     {
       name: "Ana",
