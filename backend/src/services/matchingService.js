@@ -1,4 +1,4 @@
-const normalize = value => String(value || "").trim().toLowerCase();
+const normalize = value => String(value || "").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
 
 const uniqueNormalized = values => [...new Set((values || []).map(normalize).filter(Boolean))];
 
@@ -11,7 +11,6 @@ const modalityScore = (candidateValue, jobValue) => {
   const aliases = {
     remoto: "remoto",
     remote: "remoto",
-    híbrido: "hibrido",
     hibrido: "hibrido",
     hybrid: "hibrido",
     presencial: "presencial",
