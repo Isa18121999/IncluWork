@@ -1,4 +1,4 @@
-const normalize = value => String(value || "").trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+const normalize = value => String(value || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 const uniqueNormalized = values => [...new Set((values || []).map(normalize).filter(Boolean))];
 
